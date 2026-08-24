@@ -45,7 +45,7 @@
                         <div class="checkboxContainer checkboxContainer-withDescription">
                             <label>
                                 <input is="emby-checkbox" type="checkbox" id="WriteExplicitTags" />
-                                <span>Add Jellyfin tags</span>
+                                <span>Add Jellyfin tags on tracks</span>
                             </label>
                             <div class="fieldDescription checkboxDescription">When a source says the track is explicit. Never tags albums.</div>
                         </div>
@@ -58,13 +58,19 @@
 
                     <div class="verticalSection">
                         <h3 class="checkboxListLabel">Title marks</h3>
-                        <div class="fieldDescription">Track titles only — never album names.</div>
                         <div class="checkboxContainer checkboxContainer-withDescription">
                             <label>
                                 <input is="emby-checkbox" type="checkbox" id="RenameExplicitTitles" />
                                 <span>Mark track titles</span>
                             </label>
                             <div class="fieldDescription checkboxDescription">Adds or removes the mark on song names.</div>
+                        </div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="MarkExplicitAlbums" />
+                                <span>Mark album titles</span>
+                            </label>
+                            <div class="fieldDescription checkboxDescription">Adds the mark to an album when any track on it is explicit (by tag or title mark). Track album metadata stays unmarked.</div>
                         </div>
                         <div class="selectContainer">
                             <label class="selectLabel" for="ExplicitMarkPlacement">Placement</label>
@@ -105,6 +111,7 @@
                 document.querySelector('#WriteExplicitTags').checked = config.WriteExplicitTags !== false;
                 document.querySelector('#ExplicitTags').value = config.ExplicitTags || 'Explicit';
                 document.querySelector('#RenameExplicitTitles').checked = config.RenameExplicitTitles !== false;
+                document.querySelector('#MarkExplicitAlbums').checked = config.MarkExplicitAlbums !== false;
                 var mark = (config.ExplicitMark != null ? String(config.ExplicitMark) : '').trim();
                 document.querySelector('#ExplicitMark').value = mark || '🅴';
                 document.querySelector('#ExplicitMarkPlacement').value = (config.ExplicitMarkPlacement || 'append').toLowerCase() === 'prepend' ? 'prepend' : 'append';
@@ -119,6 +126,7 @@
                     config.WriteExplicitTags = document.querySelector('#WriteExplicitTags').checked;
                     config.ExplicitTags = document.querySelector('#ExplicitTags').value;
                     config.RenameExplicitTitles = document.querySelector('#RenameExplicitTitles').checked;
+                    config.MarkExplicitAlbums = document.querySelector('#MarkExplicitAlbums').checked;
                     config.ExplicitMark = document.querySelector('#ExplicitMark').value;
                     config.ExplicitMarkPlacement = document.querySelector('#ExplicitMarkPlacement').value;
                     config.Workers = parseInt(document.querySelector('#Workers').value, 10) || 0;

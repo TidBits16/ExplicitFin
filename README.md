@@ -10,9 +10,9 @@ A Jellyfin plugin that manages **explicit tags** and **title marks** on music tr
 - **MusicBrainz** — check recording tags and disambiguation via MusicBrainz recording or track ID
 - **Apple Music** — look up `trackExplicitness` via Apple Music or iTunes provider ID
 
-Default title mark is **🅴** (appended after the track name).
+Default title mark is **🅴** (appended after the track name). Albums get the same mark when any track on them is explicit.
 
-Never tags album entities (Jellyfin copies album tags to all tracks).
+Never tags album entities with Jellyfin tags (only track tags).
 
 ## Install
 

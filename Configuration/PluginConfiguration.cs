@@ -10,6 +10,9 @@ public class PluginConfiguration : BasePluginConfiguration
 
     public bool RenameExplicitTitles { get; set; } = true;
 
+    /// <summary>Add the title mark to album names when any track on the album is explicit.</summary>
+    public bool MarkExplicitAlbums { get; set; } = true;
+
     public string ExplicitMark { get; set; } = "🅴";
 
     /// <summary>append or prepend.</summary>

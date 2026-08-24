@@ -77,38 +77,11 @@ public class ExplicitEngine
                 patches.AddOrUpdate(p.ItemId, p, (_, existing) => existing.Merge(p));
             }
 
-            foreach (var album in albums)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var albumName = album.Name ?? string.Empty;
-                var tagged = HasAnyTag(album, cfg.EffectiveExplicitTags);
-                string? nameWrite = null;
-                if (cfg.RenameExplicitTitles && Titles.HasExplicitMark(albumName))
-                {
-                    var stripped = Titles.StripMark(albumName);
-                    if (stripped.Length > 0 && stripped != albumName)
-                    {
-                        nameWrite = stripped;
-                    }
-                }
-
-                if (nameWrite is null && !tagged)
-                {
-                    continue;
-                }
-
-                Queue(new Patch
-                {
-                    ItemId = album.Id,
-                    Item = album,
-                    Name = nameWrite,
-                    Explicit = tagged ? false : null
-                });
-            }
+            var tracksByAlbum = GroupTracksByAlbum(tracks, albums);
 
             progress.Report(10);
 
-            var deezerCache = new ConcurrentDictionary<int, bool?>();
+            var deezerTrackCache = new ConcurrentDictionary<int, bool?>();
             var musicBrainzCache = new ConcurrentDictionary<string, bool?>();
             var appleMusicCache = new ConcurrentDictionary<long, bool?>();
             var trackDone = 0;
@@ -120,7 +93,7 @@ public class ExplicitEngine
                     var externalExplicit = await ResolveExternalExplicitAsync(
                         item,
                         cfg,
-                        deezerCache,
+                        deezerTrackCache,
                         musicBrainzCache,
                         appleMusicCache,
                         cancellationToken).ConfigureAwait(false);
@@ -157,9 +130,60 @@ public class ExplicitEngine
                 {
                     gate.Release();
                     var n = Interlocked.Increment(ref trackDone);
-                    progress.Report(10 + 70.0 * n / Math.Max(1, tracks.Count));
+                    progress.Report(10 + 60.0 * n / Math.Max(1, tracks.Count));
                 }
             })).ConfigureAwait(false);
+
+            progress.Report(75);
+            foreach (var album in albums)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var albumTracks = tracksByAlbum.GetValueOrDefault(album.Id) ?? [];
+                var albumName = album.Name ?? string.Empty;
+                var albumExplicit = albumTracks.Any(track =>
+                    IsTrackExplicit(track, patches.TryGetValue(track.Id, out var trackPatch) ? trackPatch : null, cfg));
+
+                string? nameWrite = null;
+                if (cfg.MarkExplicitAlbums)
+                {
+                    nameWrite = AlbumTitlePatch(albumName, albumExplicit);
+                }
+
+                bool? explicitWrite = null;
+                if (HasAnyTag(album, cfg.EffectiveExplicitTags))
+                {
+                    explicitWrite = false;
+                }
+
+                if (nameWrite is not null || explicitWrite is not null)
+                {
+                    Queue(new Patch
+                    {
+                        ItemId = album.Id,
+                        Item = album,
+                        Name = nameWrite,
+                        Explicit = explicitWrite
+                    });
+                }
+
+                var canonicalAlbumName = Titles.StripMark(nameWrite ?? albumName);
+                if (canonicalAlbumName.Length > 0)
+                {
+                    foreach (var track in albumTracks)
+                    {
+                        var current = track.Album ?? string.Empty;
+                        if (current != canonicalAlbumName)
+                        {
+                            Queue(new Patch
+                            {
+                                ItemId = track.Id,
+                                Item = track,
+                                Album = canonicalAlbumName
+                            });
+                        }
+                    }
+                }
+            }
 
             progress.Report(85);
             var list = patches.Values.ToList();
@@ -226,14 +250,14 @@ public class ExplicitEngine
     private async Task<bool?> ResolveExternalExplicitAsync(
         Audio item,
         PluginConfiguration cfg,
-        ConcurrentDictionary<int, bool?> deezerCache,
+        ConcurrentDictionary<int, bool?> deezerTrackCache,
         ConcurrentDictionary<string, bool?> musicBrainzCache,
         ConcurrentDictionary<long, bool?> appleMusicCache,
         CancellationToken cancellationToken)
     {
         if (cfg.UseDeezer)
         {
-            var deezer = await ResolveDeezerAsync(item, deezerCache, cancellationToken).ConfigureAwait(false);
+            var deezer = await ResolveDeezerAsync(item, deezerTrackCache, cancellationToken).ConfigureAwait(false);
             if (deezer is not null)
             {
                 return deezer;
@@ -280,6 +304,57 @@ public class ExplicitEngine
         var value = await _deezer.GetTrackExplicitAsync(trackId, cancellationToken).ConfigureAwait(false);
         cache[trackId] = value;
         return value;
+    }
+
+    private static Dictionary<Guid, List<Audio>> GroupTracksByAlbum(IReadOnlyList<Audio> tracks, IReadOnlyList<MusicAlbum> albums)
+    {
+        var map = albums.ToDictionary(a => a.Id, _ => new List<Audio>());
+        var albumsByName = albums
+            .GroupBy(a => Titles.StripMark(a.Name ?? string.Empty).Trim(), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+        foreach (var track in tracks)
+        {
+            if (track.GetParent() is MusicAlbum parent && map.ContainsKey(parent.Id))
+            {
+                map[parent.Id].Add(track);
+                continue;
+            }
+
+            var albumName = Titles.StripMark(track.Album ?? string.Empty).Trim();
+            if (albumName.Length > 0 && albumsByName.TryGetValue(albumName, out var match))
+            {
+                map[match.Id].Add(track);
+            }
+        }
+
+        return map;
+    }
+
+    private static bool IsTrackExplicit(Audio track, Patch? patch, PluginConfiguration cfg)
+    {
+        if (patch?.Explicit == true)
+        {
+            return true;
+        }
+
+        if (patch?.Explicit == false)
+        {
+            return false;
+        }
+
+        if (patch?.Name is not null)
+        {
+            return Titles.HasExplicitMark(patch.Name);
+        }
+
+        return HasAnyTag(track, cfg.EffectiveExplicitTags) || Titles.HasExplicitMark(track.Name);
+    }
+
+    private static string? AlbumTitlePatch(string current, bool explicitFlag)
+    {
+        var desired = Titles.DesiredTitle(current, explicitFlag);
+        return current == desired ? null : desired;
     }
 
     private async Task<bool?> ResolveMusicBrainzAsync(
