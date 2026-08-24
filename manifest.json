@@ -9,20 +9,12 @@
     "imageUrl": "",
     "versions": [
       {
-        "version": "1.1.0.0",
-        "changelog": "Renamed from Explicit Tagger to ExplicitFin.",
+        "version": "1.2.0.0",
+        "changelog": "Repository renamed to ExplicitFin on GitHub.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/jellyfin-explicit-tagger/releases/download/v1.1.0.0/explicitfin_1.1.0.0.zip",
-        "checksum": "32d0f67e25b286be9d9a5c6be2d64036",
-        "timestamp": "2026-08-24T17:23:53Z"
-      },
-      {
-        "version": "1.0.0.0",
-        "changelog": "Initial release. Explicit tags and title marks from Jellyfin tags or Deezer provider IDs.",
-        "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/jellyfin-explicit-tagger/releases/download/v1.0.0.0/explicit-tagger_1.0.0.0.zip",
-        "checksum": "155d54d2fd04b5af941e28d945493fd4",
-        "timestamp": "2026-08-24T17:09:39Z"
+        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v1.2.0.0/explicitfin_1.2.0.0.zip",
+        "checksum": "b1aebb671d4a74e5862a0c564e28f082",
+        "timestamp": "2026-08-24T17:35:00Z"
       }
     ]
   }

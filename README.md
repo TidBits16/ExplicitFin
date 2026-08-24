@@ -15,7 +15,7 @@ Never tags album entities (Jellyfin copies album tags to all tracks).
 
 1. **Dashboard → Plugins → Repositories** → add:
    - Name: `ExplicitFin`
-   - URL: `https://cdn.jsdelivr.net/gh/TidBits16/jellyfin-explicit-tagger@main/manifest.json`
+   - URL: `https://cdn.jsdelivr.net/gh/TidBits16/ExplicitFin@main/manifest.json`
 2. **Catalog** → install → restart when asked.
 3. Configure under **Plugins → ExplicitFin**, or run from **Scheduled Tasks**.
 

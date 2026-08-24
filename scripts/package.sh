@@ -39,7 +39,7 @@ print(hashlib.md5(Path(sys.argv[1]).read_bytes()).hexdigest())
 PY
 )"
 timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-source_url="https://github.com/TidBits16/jellyfin-explicit-tagger/releases/download/v${version}/explicitfin_${version}.zip"
+source_url="https://github.com/TidBits16/ExplicitFin/releases/download/v${version}/explicitfin_${version}.zip"
 
 python3 - "$version" "$checksum" "$timestamp" "$source_url" <<'PY'
 import json, sys
