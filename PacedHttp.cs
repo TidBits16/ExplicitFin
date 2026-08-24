@@ -13,13 +13,15 @@ public class PacedHttp
     private int _httpN;
     private int _hits;
 
-    public PacedHttp(IHttpClientFactory factory, HttpCache cache, TimeSpan minDelay)
+    public PacedHttp(IHttpClientFactory factory, HttpCache cache, TimeSpan minDelay, string? userAgent = null)
     {
         _http = factory.CreateClient();
         _http.Timeout = TimeSpan.FromSeconds(60);
         if (!_http.DefaultRequestHeaders.UserAgent.Any())
         {
-            _http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "explicitfin/1.1 (jellyfin-plugin)");
+            _http.DefaultRequestHeaders.TryAddWithoutValidation(
+                "User-Agent",
+                userAgent ?? "explicitfin/1.1 (jellyfin-plugin)");
         }
 
         _http.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/json");

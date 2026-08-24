@@ -19,17 +19,24 @@
                         <div class="fieldDescription">Where to read explicit yes/no. Unknown values are left alone.</div>
                         <div class="checkboxContainer checkboxContainer-withDescription">
                             <label>
-                                <input is="emby-checkbox" type="checkbox" id="UseExistingTags" />
-                                <span>Existing Jellyfin tags</span>
-                            </label>
-                            <div class="fieldDescription checkboxDescription">Honor your configured tag names (manual tagging).</div>
-                        </div>
-                        <div class="checkboxContainer checkboxContainer-withDescription">
-                            <label>
                                 <input is="emby-checkbox" type="checkbox" id="UseDeezer" />
                                 <span>Deezer</span>
                             </label>
                             <div class="fieldDescription checkboxDescription">Look up tracks by Deezer provider ID when one is stored on the item.</div>
+                        </div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="UseMusicBrainz" />
+                                <span>MusicBrainz</span>
+                            </label>
+                            <div class="fieldDescription checkboxDescription">Check recording tags and disambiguation via MusicBrainz recording or track ID.</div>
+                        </div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="UseAppleMusic" />
+                                <span>Apple Music</span>
+                            </label>
+                            <div class="fieldDescription checkboxDescription">Look up trackExplicitness by Apple Music or iTunes provider ID.</div>
                         </div>
                     </div>
 
@@ -69,7 +76,7 @@
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="ExplicitMark">Mark</label>
                             <input is="emby-input" type="text" id="ExplicitMark" />
-                            <div class="fieldDescription">e.g. [E] — a space is added automatically</div>
+                            <div class="fieldDescription">e.g. 🅴 — a space is added automatically</div>
                         </div>
                     </div>
 
@@ -92,24 +99,23 @@
             const EfConfig = { pluginUniqueId: 'f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f' };
 
             function applyConfig(config) {
-                document.querySelector('#UseExistingTags').checked = config.UseExistingTags !== false;
                 document.querySelector('#UseDeezer').checked = config.UseDeezer !== false;
+                document.querySelector('#UseMusicBrainz').checked = config.UseMusicBrainz === true;
+                document.querySelector('#UseAppleMusic').checked = config.UseAppleMusic === true;
                 document.querySelector('#WriteExplicitTags').checked = config.WriteExplicitTags !== false;
                 document.querySelector('#ExplicitTags').value = config.ExplicitTags || 'Explicit';
                 document.querySelector('#RenameExplicitTitles').checked = config.RenameExplicitTitles !== false;
                 var mark = (config.ExplicitMark != null ? String(config.ExplicitMark) : '').trim();
-                if (!mark || mark === '🅴') {
-                    mark = '[E]';
-                }
-                document.querySelector('#ExplicitMark').value = mark;
+                document.querySelector('#ExplicitMark').value = mark || '🅴';
                 document.querySelector('#ExplicitMarkPlacement').value = (config.ExplicitMarkPlacement || 'append').toLowerCase() === 'prepend' ? 'prepend' : 'append';
                 document.querySelector('#Workers').value = config.Workers || 0;
             }
 
             function saveConfig() {
                 return ApiClient.getPluginConfiguration(EfConfig.pluginUniqueId).then(function (config) {
-                    config.UseExistingTags = document.querySelector('#UseExistingTags').checked;
                     config.UseDeezer = document.querySelector('#UseDeezer').checked;
+                    config.UseMusicBrainz = document.querySelector('#UseMusicBrainz').checked;
+                    config.UseAppleMusic = document.querySelector('#UseAppleMusic').checked;
                     config.WriteExplicitTags = document.querySelector('#WriteExplicitTags').checked;
                     config.ExplicitTags = document.querySelector('#ExplicitTags').value;
                     config.RenameExplicitTitles = document.querySelector('#RenameExplicitTitles').checked;

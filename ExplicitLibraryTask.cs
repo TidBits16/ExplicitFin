@@ -23,7 +23,7 @@ public class ExplicitLibraryTask : IScheduledTask
     public string Key => "ExplicitFinLibrary";
 
     public string Description =>
-        "Adds Jellyfin explicit tags and title marks from your tags or Deezer. Repairs playlists when titles change.";
+        "Adds Jellyfin explicit tags and title marks from Deezer, MusicBrainz, or Apple Music. Repairs playlists when titles change.";
 
     public string Category => "Library";
 

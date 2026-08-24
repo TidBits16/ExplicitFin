@@ -4,7 +4,7 @@ namespace Jellyfin.Plugin.ExplicitTagger;
 
 public static class Titles
 {
-    public const string ExplicitMark = "[E]";
+    public const string ExplicitMark = "🅴";
 
     public static string Affix { get; set; } = ExplicitMark;
 

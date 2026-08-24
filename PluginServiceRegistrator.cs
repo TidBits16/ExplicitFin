@@ -10,6 +10,8 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
     {
         serviceCollection.AddSingleton<ExplicitEngine>();
         serviceCollection.AddSingleton<DeezerExplicitClient>();
+        serviceCollection.AddSingleton<MusicBrainzExplicitClient>();
+        serviceCollection.AddSingleton<AppleMusicExplicitClient>();
         serviceCollection.AddSingleton<HttpCache>();
     }
 }

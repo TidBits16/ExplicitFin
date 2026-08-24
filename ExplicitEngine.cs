@@ -17,6 +17,8 @@ public class ExplicitEngine
     private readonly IUserManager _users;
     private readonly IPlaylistManager _playlists;
     private readonly DeezerExplicitClient _deezer;
+    private readonly MusicBrainzExplicitClient _musicBrainz;
+    private readonly AppleMusicExplicitClient _appleMusic;
     private readonly MediaBrowser.Common.Configuration.IApplicationPaths _paths;
     private readonly ILogger<ExplicitEngine> _logger;
 
@@ -25,6 +27,8 @@ public class ExplicitEngine
         IUserManager users,
         IPlaylistManager playlists,
         DeezerExplicitClient deezer,
+        MusicBrainzExplicitClient musicBrainz,
+        AppleMusicExplicitClient appleMusic,
         MediaBrowser.Common.Configuration.IApplicationPaths paths,
         ILogger<ExplicitEngine> logger)
     {
@@ -32,6 +36,8 @@ public class ExplicitEngine
         _users = users;
         _playlists = playlists;
         _deezer = deezer;
+        _musicBrainz = musicBrainz;
+        _appleMusic = appleMusic;
         _paths = paths;
         _logger = logger;
     }
@@ -103,19 +109,26 @@ public class ExplicitEngine
             progress.Report(10);
 
             var deezerCache = new ConcurrentDictionary<int, bool?>();
+            var musicBrainzCache = new ConcurrentDictionary<string, bool?>();
+            var appleMusicCache = new ConcurrentDictionary<long, bool?>();
             var trackDone = 0;
             await Task.WhenAll(tracks.Select(async item =>
             {
                 await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    var deezerExplicit = await ResolveDeezerAsync(item, cfg, deezerCache, cancellationToken).ConfigureAwait(false);
-                    var tagged = cfg.UseExistingTags && HasAnyTag(item, cfg.EffectiveExplicitTags);
+                    var externalExplicit = await ResolveExternalExplicitAsync(
+                        item,
+                        cfg,
+                        deezerCache,
+                        musicBrainzCache,
+                        appleMusicCache,
+                        cancellationToken).ConfigureAwait(false);
+                    var tagged = HasAnyTag(item, cfg.EffectiveExplicitTags);
                     var marked = Titles.HasExplicitMark(item.Name);
-                    var explicitForTitle = ResolveTitleExplicit(deezerExplicit, tagged, cfg);
-                    var explicitWrite = ResolveTagWrite(item, deezerExplicit, tagged, marked, cfg);
+                    var explicitWrite = ResolveTagWrite(item, externalExplicit, tagged, marked, cfg);
 
-                    var newName = TitlePatch(item.Name, explicitForTitle, cfg);
+                    var newName = TitlePatch(item.Name, externalExplicit, cfg);
                     string? albumFieldWrite = null;
                     if (cfg.RenameExplicitTitles && Titles.HasExplicitMark(item.Album ?? string.Empty))
                     {
@@ -195,10 +208,14 @@ public class ExplicitEngine
 
             progress.Report(100);
             _logger.LogInformation(
-                "ExplicitFin finished: {Patches} writes, Deezer http {Dz}/{DzC} cache",
+                "ExplicitFin finished: {Patches} writes, Deezer http {Dz}/{DzC}, MusicBrainz http {Mb}/{MbC}, Apple Music http {Am}/{AmC}",
                 list.Count,
                 _deezer.HttpCount,
-                _deezer.CacheHits);
+                _deezer.CacheHits,
+                _musicBrainz.HttpCount,
+                _musicBrainz.CacheHits,
+                _appleMusic.HttpCount,
+                _appleMusic.CacheHits);
         }
         finally
         {
@@ -206,17 +223,49 @@ public class ExplicitEngine
         }
     }
 
-    private async Task<bool?> ResolveDeezerAsync(
+    private async Task<bool?> ResolveExternalExplicitAsync(
         Audio item,
         PluginConfiguration cfg,
+        ConcurrentDictionary<int, bool?> deezerCache,
+        ConcurrentDictionary<string, bool?> musicBrainzCache,
+        ConcurrentDictionary<long, bool?> appleMusicCache,
+        CancellationToken cancellationToken)
+    {
+        if (cfg.UseDeezer)
+        {
+            var deezer = await ResolveDeezerAsync(item, deezerCache, cancellationToken).ConfigureAwait(false);
+            if (deezer is not null)
+            {
+                return deezer;
+            }
+        }
+
+        if (cfg.UseMusicBrainz)
+        {
+            var musicBrainz = await ResolveMusicBrainzAsync(item, musicBrainzCache, cancellationToken).ConfigureAwait(false);
+            if (musicBrainz is not null)
+            {
+                return musicBrainz;
+            }
+        }
+
+        if (cfg.UseAppleMusic)
+        {
+            var appleMusic = await ResolveAppleMusicAsync(item, appleMusicCache, cancellationToken).ConfigureAwait(false);
+            if (appleMusic is not null)
+            {
+                return appleMusic;
+            }
+        }
+
+        return null;
+    }
+
+    private async Task<bool?> ResolveDeezerAsync(
+        Audio item,
         ConcurrentDictionary<int, bool?> cache,
         CancellationToken cancellationToken)
     {
-        if (!cfg.UseDeezer)
-        {
-            return null;
-        }
-
         var idText = item.GetProviderId("Deezer");
         if (!int.TryParse(idText, out var trackId) || trackId <= 0)
         {
@@ -233,44 +282,84 @@ public class ExplicitEngine
         return value;
     }
 
-    private static bool? ResolveTitleExplicit(bool? deezerExplicit, bool tagged, PluginConfiguration cfg)
+    private async Task<bool?> ResolveMusicBrainzAsync(
+        Audio item,
+        ConcurrentDictionary<string, bool?> cache,
+        CancellationToken cancellationToken)
     {
-        if (deezerExplicit is not null)
+        var recordingId = item.GetProviderId("MusicBrainzRecording")
+            ?? item.GetProviderId("MusicBrainz");
+
+        if (string.IsNullOrWhiteSpace(recordingId))
         {
-            return deezerExplicit;
+            var trackId = item.GetProviderId("MusicBrainzTrack");
+            if (!string.IsNullOrWhiteSpace(trackId))
+            {
+                recordingId = await _musicBrainz.ResolveRecordingIdFromTrackAsync(trackId, cancellationToken).ConfigureAwait(false);
+            }
         }
 
-        if (cfg.UseExistingTags && tagged)
+        if (string.IsNullOrWhiteSpace(recordingId))
         {
-            return true;
+            return null;
         }
 
-        return null;
+        recordingId = recordingId.Trim();
+        if (cache.TryGetValue(recordingId, out var hit))
+        {
+            return hit;
+        }
+
+        var value = await _musicBrainz.GetRecordingExplicitAsync(recordingId, cancellationToken).ConfigureAwait(false);
+        cache[recordingId] = value;
+        return value;
     }
 
-    private static bool? ResolveTagWrite(Audio item, bool? deezerExplicit, bool tagged, bool marked, PluginConfiguration cfg)
+    private async Task<bool?> ResolveAppleMusicAsync(
+        Audio item,
+        ConcurrentDictionary<long, bool?> cache,
+        CancellationToken cancellationToken)
+    {
+        var idText = item.GetProviderId("Apple Music")
+            ?? item.GetProviderId("iTunes");
+        if (!long.TryParse(idText, out var trackId) || trackId <= 0)
+        {
+            return null;
+        }
+
+        if (cache.TryGetValue(trackId, out var hit))
+        {
+            return hit;
+        }
+
+        var value = await _appleMusic.GetTrackExplicitAsync(trackId, cancellationToken).ConfigureAwait(false);
+        cache[trackId] = value;
+        return value;
+    }
+
+    private static bool HasExternalSource(PluginConfiguration cfg)
+        => cfg.UseDeezer || cfg.UseMusicBrainz || cfg.UseAppleMusic;
+
+    private static bool? ResolveTagWrite(Audio item, bool? externalExplicit, bool tagged, bool marked, PluginConfiguration cfg)
     {
         if (!cfg.WriteExplicitTags || cfg.EffectiveExplicitTags.Count == 0)
         {
             return null;
         }
 
-        if (cfg.UseDeezer && deezerExplicit == true && !tagged)
+        var hasExternalSource = HasExternalSource(cfg);
+
+        if (hasExternalSource && externalExplicit == true && !tagged)
         {
             return true;
         }
 
-        if (cfg.UseDeezer && deezerExplicit == false && (tagged || marked))
+        if (hasExternalSource && externalExplicit == false && (tagged || marked))
         {
             return false;
         }
 
-        if (cfg.UseDeezer && deezerExplicit == true && cfg.EffectiveExplicitTags.Any(t => !HasTag(item, t)))
-        {
-            return true;
-        }
-
-        if (!cfg.UseDeezer && cfg.UseExistingTags && tagged)
+        if (hasExternalSource && externalExplicit == true && cfg.EffectiveExplicitTags.Any(t => !HasTag(item, t)))
         {
             return true;
         }

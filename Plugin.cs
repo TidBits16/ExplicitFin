@@ -22,7 +22,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public override string Name => "ExplicitFin";
 
     public override string Description =>
-        "Adds Jellyfin explicit tags and title marks from your tags, file metadata, or Deezer (via provider ID).";
+        "Adds Jellyfin explicit tags and title marks from Deezer, MusicBrainz, or Apple Music.";
 
     public override Guid Id => PluginGuid;
 

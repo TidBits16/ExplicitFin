@@ -10,16 +10,19 @@ public class PluginConfiguration : BasePluginConfiguration
 
     public bool RenameExplicitTitles { get; set; } = true;
 
-    public string ExplicitMark { get; set; } = "[E]";
+    public string ExplicitMark { get; set; } = "🅴";
 
     /// <summary>append or prepend.</summary>
     public string ExplicitMarkPlacement { get; set; } = "append";
 
-    /// <summary>Honor configured Jellyfin tags as an explicit source.</summary>
-    public bool UseExistingTags { get; set; } = true;
-
     /// <summary>Look up explicit flag from Deezer using the stored provider ID.</summary>
     public bool UseDeezer { get; set; } = true;
+
+    /// <summary>Look up explicit tags on the MusicBrainz recording.</summary>
+    public bool UseMusicBrainz { get; set; }
+
+    /// <summary>Look up trackExplicitness from Apple Music / iTunes using the stored provider ID.</summary>
+    public bool UseAppleMusic { get; set; }
 
     /// <summary>Gets or sets worker count. 0 means use CPU count.</summary>
     public int Workers { get; set; }
