@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Explicit Tagger</title>
+    <title>ExplicitFin</title>
 </head>
 <body>
-    <div id="EtConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox,emby-select">
+    <div id="EfConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox,emby-select">
         <div data-role="content">
             <div class="content-primary">
-                <form id="EtConfigForm">
+                <form id="EfConfigForm">
                     <div class="sectionTitleContainer flex align-items-center">
-                        <h2 class="sectionTitle">Explicit Tagger</h2>
+                        <h2 class="sectionTitle">ExplicitFin</h2>
                     </div>
                     <p>Manages Jellyfin explicit tags and title marks. Works on its own or alongside Deezer Genre Search.</p>
 
@@ -89,7 +89,7 @@
             </div>
         </div>
         <script>
-            const EtConfig = { pluginUniqueId: 'f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f' };
+            const EfConfig = { pluginUniqueId: 'f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f' };
 
             function applyConfig(config) {
                 document.querySelector('#UseExistingTags').checked = config.UseExistingTags !== false;
@@ -107,7 +107,7 @@
             }
 
             function saveConfig() {
-                return ApiClient.getPluginConfiguration(EtConfig.pluginUniqueId).then(function (config) {
+                return ApiClient.getPluginConfiguration(EfConfig.pluginUniqueId).then(function (config) {
                     config.UseExistingTags = document.querySelector('#UseExistingTags').checked;
                     config.UseDeezer = document.querySelector('#UseDeezer').checked;
                     config.WriteExplicitTags = document.querySelector('#WriteExplicitTags').checked;
@@ -116,19 +116,19 @@
                     config.ExplicitMark = document.querySelector('#ExplicitMark').value;
                     config.ExplicitMarkPlacement = document.querySelector('#ExplicitMarkPlacement').value;
                     config.Workers = parseInt(document.querySelector('#Workers').value, 10) || 0;
-                    return ApiClient.updatePluginConfiguration(EtConfig.pluginUniqueId, config);
+                    return ApiClient.updatePluginConfiguration(EfConfig.pluginUniqueId, config);
                 });
             }
 
-            document.querySelector('#EtConfigPage').addEventListener('pageshow', function () {
+            document.querySelector('#EfConfigPage').addEventListener('pageshow', function () {
                 Dashboard.showLoadingMsg();
-                ApiClient.getPluginConfiguration(EtConfig.pluginUniqueId).then(function (config) {
+                ApiClient.getPluginConfiguration(EfConfig.pluginUniqueId).then(function (config) {
                     applyConfig(config);
                     Dashboard.hideLoadingMsg();
                 });
             });
 
-            document.querySelector('#EtConfigForm').addEventListener('submit', function (e) {
+            document.querySelector('#EfConfigForm').addEventListener('submit', function (e) {
                 e.preventDefault();
                 Dashboard.showLoadingMsg();
                 saveConfig().then(function (result) {

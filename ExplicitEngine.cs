@@ -58,7 +58,7 @@ public class ExplicitEngine
                 Recursive = true
             }).OfType<MusicAlbum>().Where(a => a.Id != Guid.Empty).ToList();
 
-            _logger.LogInformation("Explicit Tagger: {Tracks} tracks, {Albums} albums, {Workers} workers", tracks.Count, albums.Count, workers);
+            _logger.LogInformation("ExplicitFin: {Tracks} tracks, {Albums} albums, {Workers} workers", tracks.Count, albums.Count, workers);
 
             var patches = new ConcurrentDictionary<Guid, Patch>();
             void Queue(Patch p)
@@ -160,7 +160,7 @@ public class ExplicitEngine
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Explicit Tagger failed to update {Id}", p.ItemId);
+                    _logger.LogWarning(ex, "ExplicitFin failed to update {Id}", p.ItemId);
                 }
                 finally
                 {
@@ -180,22 +180,22 @@ public class ExplicitEngine
                     try
                     {
                         await repair.ApplyAsync(plan, cancellationToken).ConfigureAwait(false);
-                        _logger.LogInformation("Explicit Tagger rewrote playlist {Name} ({Live} → {Desired})", plan.Name, plan.LiveIds.Count, plan.DesiredIds.Count);
+                        _logger.LogInformation("ExplicitFin rewrote playlist {Name} ({Live} → {Desired})", plan.Name, plan.LiveIds.Count, plan.DesiredIds.Count);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Explicit Tagger playlist {Name} failed", plan.Name);
+                        _logger.LogWarning(ex, "ExplicitFin playlist {Name} failed", plan.Name);
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Explicit Tagger playlist repair skipped");
+                _logger.LogWarning(ex, "ExplicitFin playlist repair skipped");
             }
 
             progress.Report(100);
             _logger.LogInformation(
-                "Explicit Tagger finished: {Patches} writes, Deezer http {Dz}/{DzC} cache",
+                "ExplicitFin finished: {Patches} writes, Deezer http {Dz}/{DzC} cache",
                 list.Count,
                 _deezer.HttpCount,
                 _deezer.CacheHits);

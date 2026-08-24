@@ -19,7 +19,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     public static Plugin? Instance { get; private set; }
 
-    public override string Name => "Explicit Tagger";
+    public override string Name => "ExplicitFin";
 
     public override string Description =>
         "Adds Jellyfin explicit tags and title marks from your tags, file metadata, or Deezer (via provider ID).";

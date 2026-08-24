@@ -387,7 +387,7 @@ public class PlaylistRepair
         return outMap;
     }
 
-    private string SnapshotPath() => System.IO.Path.Combine(_paths.DataPath, "plugins", "explicit-tagger", "playlist_snapshot.json");
+    private string SnapshotPath() => System.IO.Path.Combine(_paths.DataPath, "plugins", "explicitfin", "playlist_snapshot.json");
 
     private static List<PlaylistState> Coalesce(List<PlaylistState> live, Dictionary<string, PlaylistState> snapshot, Dictionary<string, List<PlaylistEntry>> salvage)
     {

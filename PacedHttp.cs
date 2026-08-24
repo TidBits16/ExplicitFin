@@ -19,7 +19,7 @@ public class PacedHttp
         _http.Timeout = TimeSpan.FromSeconds(60);
         if (!_http.DefaultRequestHeaders.UserAgent.Any())
         {
-            _http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "explicit-tagger/1.0 (jellyfin-plugin)");
+            _http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "explicitfin/1.1 (jellyfin-plugin)");
         }
 
         _http.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/json");

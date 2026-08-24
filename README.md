@@ -1,4 +1,4 @@
-# Explicit Tagger
+# ExplicitFin
 
 A Jellyfin plugin that manages **explicit tags** and **title marks** on music tracks — separate from [Deezer Genre Search](https://github.com/TidBits16/peanut-butter-jelly).
 
@@ -14,10 +14,10 @@ Never tags album entities (Jellyfin copies album tags to all tracks).
 ## Install
 
 1. **Dashboard → Plugins → Repositories** → add:
-   - Name: `Explicit Tagger`
+   - Name: `ExplicitFin`
    - URL: `https://cdn.jsdelivr.net/gh/TidBits16/jellyfin-explicit-tagger@main/manifest.json`
 2. **Catalog** → install → restart when asked.
-3. Configure under **Plugins → Explicit Tagger**, or run from **Scheduled Tasks**.
+3. Configure under **Plugins → ExplicitFin**, or run from **Scheduled Tasks**.
 
 ## With Deezer Genre Search
 

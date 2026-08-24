@@ -12,7 +12,7 @@ public class HttpCache
 
     public HttpCache(IApplicationPaths paths)
     {
-        _dir = Path.Combine(paths.CachePath, "explicit-tagger");
+        _dir = Path.Combine(paths.CachePath, "explicitfin");
         Directory.CreateDirectory(_dir);
     }
 

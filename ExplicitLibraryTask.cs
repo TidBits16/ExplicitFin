@@ -18,9 +18,9 @@ public class ExplicitLibraryTask : IScheduledTask
         _logger = logger;
     }
 
-    public string Name => "Explicit Tagger";
+    public string Name => "ExplicitFin";
 
-    public string Key => "ExplicitTaggerLibrary";
+    public string Key => "ExplicitFinLibrary";
 
     public string Description =>
         "Adds Jellyfin explicit tags and title marks from your tags or Deezer. Repairs playlists when titles change.";
@@ -39,7 +39,7 @@ public class ExplicitLibraryTask : IScheduledTask
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Explicit Tagger failed");
+            _logger.LogError(ex, "ExplicitFin failed");
             throw;
         }
     }

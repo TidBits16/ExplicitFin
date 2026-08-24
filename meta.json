@@ -1,12 +1,12 @@
 {
   "guid": "f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f",
-  "name": "Explicit Tagger",
+  "name": "ExplicitFin",
   "description": "Jellyfin explicit tags and title marks from your tags or Deezer.",
-  "overview": "Scheduled-task explicit tagger for Jellyfin music.",
+  "overview": "Explicit tagging for Jellyfin music.",
   "owner": "TidBits16",
   "category": "Metadata",
   "imageUrl": "",
-  "version": "1.0.0.0",
+  "version": "1.1.0.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Initial release. Explicit tags and title marks from Jellyfin tags or Deezer provider IDs."
+  "changelog": "Renamed from Explicit Tagger to ExplicitFin."
 }

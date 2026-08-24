@@ -21,7 +21,7 @@ cp "bin/Release/net9.0/Jellyfin.Plugin.ExplicitTagger.dll" "$stage/"
 cp meta.json "$stage/"
 
 mkdir -p dist
-zip_path="$root/dist/explicit-tagger_${version}.zip"
+zip_path="$root/dist/explicitfin_${version}.zip"
 rm -f "$zip_path"
 python3 - "$stage" "$zip_path" <<'PY'
 import sys, zipfile
@@ -39,7 +39,7 @@ print(hashlib.md5(Path(sys.argv[1]).read_bytes()).hexdigest())
 PY
 )"
 timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-source_url="https://github.com/TidBits16/jellyfin-explicit-tagger/releases/download/v${version}/explicit-tagger_${version}.zip"
+source_url="https://github.com/TidBits16/jellyfin-explicit-tagger/releases/download/v${version}/explicitfin_${version}.zip"
 
 python3 - "$version" "$checksum" "$timestamp" "$source_url" <<'PY'
 import json, sys
