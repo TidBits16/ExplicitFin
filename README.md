@@ -1,6 +1,6 @@
 # ExplicitFin
 
-A Jellyfin plugin that manages **explicit tags** and **title marks** on music tracks — separate from [Deezer Genres](https://github.com/TidBits16/peanut-butter-jelly).
+A Jellyfin plugin that manages **explicit tags** and **title marks** on music tracks — separate from [Deezer Genres](https://github.com/TidBits16/deezer-genres).
 
 **Jellyfin 10.11+** · runs as a scheduled task.
 
