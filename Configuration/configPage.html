@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Explicit Tagger</title>
+</head>
+<body>
+    <div id="EtConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox,emby-select">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="EtConfigForm">
+                    <div class="sectionTitleContainer flex align-items-center">
+                        <h2 class="sectionTitle">Explicit Tagger</h2>
+                    </div>
+                    <p>Manages Jellyfin explicit tags and title marks. Works on its own or alongside Peanut Butter &amp; Jelly (uses Deezer provider IDs when present).</p>
+
+                    <div class="verticalSection">
+                        <h3 class="checkboxListLabel">Sources</h3>
+                        <div class="fieldDescription">Where to read explicit yes/no. Unknown values are left alone.</div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="UseExistingTags" />
+                                <span>Existing Jellyfin tags</span>
+                            </label>
+                            <div class="fieldDescription checkboxDescription">Honor your configured tag names (manual tagging).</div>
+                        </div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="UseDeezer" />
+                                <span>Deezer</span>
+                            </label>
+                            <div class="fieldDescription checkboxDescription">Look up tracks by Deezer provider ID (e.g. from PBJ sync).</div>
+                        </div>
+                    </div>
+
+                    <div class="verticalSection">
+                        <h3 class="checkboxListLabel">Tags</h3>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="WriteExplicitTags" />
+                                <span>Add Jellyfin tags</span>
+                            </label>
+                            <div class="fieldDescription checkboxDescription">When a source says the track is explicit. Never tags albums.</div>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="ExplicitTags">Tag names</label>
+                            <input is="emby-input" type="text" id="ExplicitTags" />
+                            <div class="fieldDescription">Comma-separated, e.g. Explicit, NSFW</div>
+                        </div>
+                    </div>
+
+                    <div class="verticalSection">
+                        <h3 class="checkboxListLabel">Title marks</h3>
+                        <div class="fieldDescription">Track titles only — never album names.</div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="RenameExplicitTitles" />
+                                <span>Mark track titles</span>
+                            </label>
+                            <div class="fieldDescription checkboxDescription">Adds or removes the mark on song names.</div>
+                        </div>
+                        <div class="selectContainer">
+                            <label class="selectLabel" for="ExplicitMarkPlacement">Placement</label>
+                            <select is="emby-select" id="ExplicitMarkPlacement">
+                                <option value="append">After the title</option>
+                                <option value="prepend">Before the title</option>
+                            </select>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="ExplicitMark">Mark</label>
+                            <input is="emby-input" type="text" id="ExplicitMark" />
+                            <div class="fieldDescription">e.g. [E] — a space is added automatically</div>
+                        </div>
+                    </div>
+
+                    <details class="verticalSection">
+                        <summary class="checkboxListLabel" style="cursor:pointer">Advanced</summary>
+                        <div class="inputContainer" style="margin-top:1em">
+                            <label class="inputLabel" for="Workers">Workers</label>
+                            <input is="emby-input" type="number" id="Workers" min="0" />
+                            <div class="fieldDescription">0 = auto (CPU count)</div>
+                        </div>
+                    </details>
+
+                    <button is="emby-button" type="submit" class="raised button-submit block">
+                        <span>Save</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <script>
+            const EtConfig = { pluginUniqueId: 'f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f' };
+
+            function applyConfig(config) {
+                document.querySelector('#UseExistingTags').checked = config.UseExistingTags !== false;
+                document.querySelector('#UseDeezer').checked = config.UseDeezer !== false;
+                document.querySelector('#WriteExplicitTags').checked = config.WriteExplicitTags !== false;
+                document.querySelector('#ExplicitTags').value = config.ExplicitTags || 'Explicit';
+                document.querySelector('#RenameExplicitTitles').checked = config.RenameExplicitTitles !== false;
+                var mark = (config.ExplicitMark != null ? String(config.ExplicitMark) : '').trim();
+                if (!mark || mark === '🅴') {
+                    mark = '[E]';
+                }
+                document.querySelector('#ExplicitMark').value = mark;
+                document.querySelector('#ExplicitMarkPlacement').value = (config.ExplicitMarkPlacement || 'append').toLowerCase() === 'prepend' ? 'prepend' : 'append';
+                document.querySelector('#Workers').value = config.Workers || 0;
+            }
+
+            function saveConfig() {
+                return ApiClient.getPluginConfiguration(EtConfig.pluginUniqueId).then(function (config) {
+                    config.UseExistingTags = document.querySelector('#UseExistingTags').checked;
+                    config.UseDeezer = document.querySelector('#UseDeezer').checked;
+                    config.WriteExplicitTags = document.querySelector('#WriteExplicitTags').checked;
+                    config.ExplicitTags = document.querySelector('#ExplicitTags').value;
+                    config.RenameExplicitTitles = document.querySelector('#RenameExplicitTitles').checked;
+                    config.ExplicitMark = document.querySelector('#ExplicitMark').value;
+                    config.ExplicitMarkPlacement = document.querySelector('#ExplicitMarkPlacement').value;
+                    config.Workers = parseInt(document.querySelector('#Workers').value, 10) || 0;
+                    return ApiClient.updatePluginConfiguration(EtConfig.pluginUniqueId, config);
+                });
+            }
+
+            document.querySelector('#EtConfigPage').addEventListener('pageshow', function () {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(EtConfig.pluginUniqueId).then(function (config) {
+                    applyConfig(config);
+                    Dashboard.hideLoadingMsg();
+                });
+            });
+
+            document.querySelector('#EtConfigForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                Dashboard.showLoadingMsg();
+                saveConfig().then(function (result) {
+                    Dashboard.processPluginConfigurationUpdateResult(result);
+                }).catch(function () {
+                    Dashboard.hideLoadingMsg();
+                });
+                return false;
+            });
+        </script>
+    </div>
+</body>
+</html>

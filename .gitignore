@@ -1,0 +1,6 @@
+.mb_cache/
+.env
+/bin/
+/obj/
+/dist/
+*.user
