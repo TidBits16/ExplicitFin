@@ -127,7 +127,7 @@ public class ExplicitEngine
         var album = Titles.StripMark(
             string.IsNullOrWhiteSpace(albumName) ? (track.Album ?? string.Empty) : albumName);
 
-        var (result, source) = await ResolveAsync(title, artist, album, cancellationToken).ConfigureAwait(false);
+        var (result, source) = await ResolveAsync(title, artist, album, cfg, cancellationToken).ConfigureAwait(false);
         var decision = Decide(result, cfg.EffectiveDualVersionPreference);
         if (decision is null)
         {
@@ -165,18 +165,40 @@ public class ExplicitEngine
         string title,
         string artist,
         string album,
+        PluginConfiguration cfg,
         CancellationToken cancellationToken)
     {
-        var deezer = await _deezer.SearchAsync(title, artist, album, cancellationToken).ConfigureAwait(false);
-        if (deezer.HasAny)
+        var threshold = cfg.EffectiveMinTitleSimilarity;
+        var providers = cfg.EffectiveMetadataProviders;
+        if (providers.Count == 0)
         {
-            return (deezer, "deezer");
+            providers = PluginConfiguration.AllProvidersInOrder;
         }
 
-        var musicBrainz = await _musicBrainz.SearchAsync(title, artist, album, cancellationToken).ConfigureAwait(false);
-        if (musicBrainz.HasAny)
+        foreach (var provider in providers)
         {
-            return (musicBrainz, "musicbrainz");
+            ExplicitSearchResult result;
+            string source;
+            switch (provider)
+            {
+                case MetadataProvider.Deezer:
+                    result = await _deezer.SearchAsync(title, artist, album, threshold, cancellationToken)
+                        .ConfigureAwait(false);
+                    source = "deezer";
+                    break;
+                case MetadataProvider.MusicBrainz:
+                    result = await _musicBrainz.SearchAsync(title, artist, album, threshold, cancellationToken)
+                        .ConfigureAwait(false);
+                    source = "musicbrainz";
+                    break;
+                default:
+                    continue;
+            }
+
+            if (result.HasAny)
+            {
+                return (result, source);
+            }
         }
 
         return (ExplicitSearchResult.Empty, "none");

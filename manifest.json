@@ -9,6 +9,14 @@
     "imageUrl": "",
     "versions": [
       {
+        "version": "2.0.1.0",
+        "changelog": "MusicFin-style settings: sortable providers, MusicBrainz contact, and configurable min similarity.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.1.0/explicitfin_2.0.1.0.zip",
+        "checksum": "a2ba5f12e4fc7546e89f66e4eb9fcbab",
+        "timestamp": "2026-08-28T20:48:58Z"
+      },
+      {
         "version": "2.0.0.0",
         "changelog": "Simplify to title marking: Deezer\u2192MusicBrainz search, dual-version preference, change log. Drop tags, album marks, Apple Music, playlist repair, disk cache.",
         "targetAbi": "10.11.0.0",

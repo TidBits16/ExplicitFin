@@ -22,6 +22,7 @@ public sealed class DeezerExplicitClient
         string title,
         string artist,
         string album,
+        double threshold,
         CancellationToken cancellationToken)
     {
         var qTitle = FuzzyMatch.Normalize(title);
@@ -83,7 +84,7 @@ public sealed class DeezerExplicitClient
                 hitAlbum = JsonUtil.Str(albumObj, "title");
             }
 
-            if (!FuzzyMatch.MeetsThreshold(title, artist, album, hitTitle, hitArtist, hitAlbum))
+            if (!FuzzyMatch.MeetsThreshold(title, artist, album, hitTitle, hitArtist, hitAlbum, threshold))
             {
                 continue;
             }

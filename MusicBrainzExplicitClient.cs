@@ -15,7 +15,7 @@ public sealed class MusicBrainzExplicitClient
         _http = new PacedHttp(
             factory,
             TimeSpan.FromMilliseconds(1100),
-            "ExplicitFin/2.0 ( https://github.com/TidBits16/ExplicitFin )");
+            BuildUserAgent());
     }
 
     public int HttpCount => _http.HttpCount;
@@ -24,6 +24,7 @@ public sealed class MusicBrainzExplicitClient
         string title,
         string artist,
         string album,
+        double threshold,
         CancellationToken cancellationToken)
     {
         var qTitle = FuzzyMatch.Normalize(title);
@@ -72,13 +73,13 @@ public sealed class MusicBrainzExplicitClient
         {
             var hitTitle = JsonUtil.Str(recording, "title");
             var hitArtist = FirstArtistName(recording);
-            if (FuzzyMatch.Similarity(title, hitTitle) < FuzzyMatch.Threshold)
+            if (FuzzyMatch.Similarity(title, hitTitle) < threshold)
             {
                 continue;
             }
 
             if (FuzzyMatch.Normalize(artist).Length > 0
-                && FuzzyMatch.Similarity(artist, hitArtist) < FuzzyMatch.Threshold)
+                && FuzzyMatch.Similarity(artist, hitArtist) < threshold)
             {
                 continue;
             }
@@ -101,7 +102,7 @@ public sealed class MusicBrainzExplicitClient
             }
 
             var hitAlbum = FirstReleaseTitle(detail);
-            if (!FuzzyMatch.MeetsThreshold(title, artist, album, hitTitle, hitArtist, hitAlbum))
+            if (!FuzzyMatch.MeetsThreshold(title, artist, album, hitTitle, hitArtist, hitAlbum, threshold))
             {
                 continue;
             }
@@ -219,5 +220,16 @@ public sealed class MusicBrainzExplicitClient
         }
 
         return false;
+    }
+
+    private static string BuildUserAgent()
+    {
+        var contact = Plugin.Instance?.Configuration.MusicBrainzContact?.Trim();
+        if (string.IsNullOrEmpty(contact))
+        {
+            contact = "https://github.com/TidBits16/ExplicitFin";
+        }
+
+        return "ExplicitFin/2.0 ( " + contact + " )";
     }
 }
