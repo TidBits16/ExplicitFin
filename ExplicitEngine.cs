@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Concurrent;
+using System.Text;
 using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.ExplicitTagger.Configuration;
+using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Playlists;
-using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ExplicitTagger;
@@ -14,30 +12,21 @@ namespace Jellyfin.Plugin.ExplicitTagger;
 public class ExplicitEngine
 {
     private readonly ILibraryManager _library;
-    private readonly IUserManager _users;
-    private readonly IPlaylistManager _playlists;
     private readonly DeezerExplicitClient _deezer;
     private readonly MusicBrainzExplicitClient _musicBrainz;
-    private readonly AppleMusicExplicitClient _appleMusic;
-    private readonly MediaBrowser.Common.Configuration.IApplicationPaths _paths;
+    private readonly IApplicationPaths _paths;
     private readonly ILogger<ExplicitEngine> _logger;
 
     public ExplicitEngine(
         ILibraryManager library,
-        IUserManager users,
-        IPlaylistManager playlists,
         DeezerExplicitClient deezer,
         MusicBrainzExplicitClient musicBrainz,
-        AppleMusicExplicitClient appleMusic,
-        MediaBrowser.Common.Configuration.IApplicationPaths paths,
+        IApplicationPaths paths,
         ILogger<ExplicitEngine> logger)
     {
         _library = library;
-        _users = users;
-        _playlists = playlists;
         _deezer = deezer;
         _musicBrainz = musicBrainz;
-        _appleMusic = appleMusic;
         _paths = paths;
         _logger = logger;
     }
@@ -50,196 +39,70 @@ public class ExplicitEngine
         Titles.UseStyle(cfg.ExplicitMark, cfg.PrependExplicitMark);
         try
         {
-            using var gate = new SemaphoreSlim(workers, workers);
-
             var tracks = _library.GetItemList(new InternalItemsQuery
             {
                 IncludeItemTypes = [BaseItemKind.Audio],
                 Recursive = true
             }).OfType<Audio>().Where(t => t.Id != Guid.Empty).ToList();
 
-            var albums = _library.GetItemList(new InternalItemsQuery
-            {
-                IncludeItemTypes = [BaseItemKind.MusicAlbum],
-                Recursive = true
-            }).OfType<MusicAlbum>().Where(a => a.Id != Guid.Empty).ToList();
+            var albums = GroupByAlbum(tracks);
+            _logger.LogInformation(
+                "ExplicitFin: {Tracks} tracks across {Albums} albums, {Workers} workers",
+                tracks.Count,
+                albums.Count,
+                workers);
 
-            _logger.LogInformation("ExplicitFin: {Tracks} tracks, {Albums} albums, {Workers} workers", tracks.Count, albums.Count, workers);
+            var changeLogPath = Path.Combine(_paths.PluginConfigurationsPath, "ExplicitFin-changes.log");
+            var totalWrites = 0;
+            var albumIndex = 0;
 
-            var patches = new ConcurrentDictionary<Guid, Patch>();
-            void Queue(Patch p)
-            {
-                if (p.Empty)
-                {
-                    return;
-                }
-
-                patches.AddOrUpdate(p.ItemId, p, (_, existing) => existing.Merge(p));
-            }
-
-            var tracksByAlbum = GroupTracksByAlbum(tracks, albums);
-
-            progress.Report(10);
-
-            var deezerTrackCache = new ConcurrentDictionary<int, bool?>();
-            var musicBrainzCache = new ConcurrentDictionary<string, bool?>();
-            var appleMusicCache = new ConcurrentDictionary<long, bool?>();
-            var trackDone = 0;
-            await Task.WhenAll(tracks.Select(async item =>
-            {
-                await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
-                try
-                {
-                    var externalExplicit = await ResolveExternalExplicitAsync(
-                        item,
-                        cfg,
-                        deezerTrackCache,
-                        musicBrainzCache,
-                        appleMusicCache,
-                        cancellationToken).ConfigureAwait(false);
-                    var tagged = HasAnyTag(item, cfg.EffectiveExplicitTags);
-                    var marked = Titles.HasExplicitMark(item.Name);
-                    var explicitWrite = ResolveTagWrite(item, externalExplicit, tagged, marked, cfg);
-
-                    var newName = TitlePatch(item.Name, externalExplicit, cfg);
-                    string? albumFieldWrite = null;
-                    if (cfg.RenameExplicitTitles && Titles.HasExplicitMark(item.Album ?? string.Empty))
-                    {
-                        var stripped = Titles.StripMark(item.Album ?? string.Empty);
-                        if (stripped.Length > 0 && stripped != item.Album)
-                        {
-                            albumFieldWrite = stripped;
-                        }
-                    }
-
-                    if (newName is null && explicitWrite is null && albumFieldWrite is null)
-                    {
-                        return;
-                    }
-
-                    Queue(new Patch
-                    {
-                        ItemId = item.Id,
-                        Item = item,
-                        Name = newName,
-                        Album = albumFieldWrite,
-                        Explicit = explicitWrite
-                    });
-                }
-                finally
-                {
-                    gate.Release();
-                    var n = Interlocked.Increment(ref trackDone);
-                    progress.Report(10 + 60.0 * n / Math.Max(1, tracks.Count));
-                }
-            })).ConfigureAwait(false);
-
-            progress.Report(75);
-            foreach (var album in albums)
+            foreach (var albumGroup in albums)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var albumTracks = tracksByAlbum.GetValueOrDefault(album.Id) ?? [];
-                var albumName = album.Name ?? string.Empty;
-                var albumExplicit = albumTracks.Any(track =>
-                    IsTrackExplicit(track, patches.TryGetValue(track.Id, out var trackPatch) ? trackPatch : null, cfg));
+                albumIndex++;
+                using var gate = new SemaphoreSlim(workers, workers);
+                var albumWrites = 0;
 
-                string? nameWrite = null;
-                if (cfg.MarkExplicitAlbums)
+                await Task.WhenAll(albumGroup.Tracks.Select(async track =>
                 {
-                    nameWrite = AlbumTitlePatch(albumName, albumExplicit);
-                }
-
-                bool? explicitWrite = null;
-                if (HasAnyTag(album, cfg.EffectiveExplicitTags))
-                {
-                    explicitWrite = false;
-                }
-
-                if (nameWrite is not null || explicitWrite is not null)
-                {
-                    Queue(new Patch
-                    {
-                        ItemId = album.Id,
-                        Item = album,
-                        Name = nameWrite,
-                        Explicit = explicitWrite
-                    });
-                }
-
-                var canonicalAlbumName = Titles.StripMark(nameWrite ?? albumName);
-                if (canonicalAlbumName.Length > 0)
-                {
-                    foreach (var track in albumTracks)
-                    {
-                        var current = track.Album ?? string.Empty;
-                        if (current != canonicalAlbumName)
-                        {
-                            Queue(new Patch
-                            {
-                                ItemId = track.Id,
-                                Item = track,
-                                Album = canonicalAlbumName
-                            });
-                        }
-                    }
-                }
-            }
-
-            progress.Report(85);
-            var list = patches.Values.ToList();
-            var applyDone = 0;
-            await Task.WhenAll(list.Select(async p =>
-            {
-                await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
-                try
-                {
-                    await ApplyPatchAsync(p, cfg, cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "ExplicitFin failed to update {Id}", p.ItemId);
-                }
-                finally
-                {
-                    gate.Release();
-                    var n = Interlocked.Increment(ref applyDone);
-                    progress.Report(85 + 10.0 * n / Math.Max(1, list.Count));
-                }
-            })).ConfigureAwait(false);
-
-            try
-            {
-                var repair = new PlaylistRepair(_playlists, _users, _paths, _logger);
-                var (plans, states) = await repair.PlanAsync(tracks, cancellationToken).ConfigureAwait(false);
-                repair.SaveSnapshot(states);
-                foreach (var plan in plans.Where(p => p.NeedsWrite))
-                {
+                    await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
                     try
                     {
-                        await repair.ApplyAsync(plan, cancellationToken).ConfigureAwait(false);
-                        _logger.LogInformation("ExplicitFin rewrote playlist {Name} ({Live} → {Desired})", plan.Name, plan.LiveIds.Count, plan.DesiredIds.Count);
+                        var changed = await ProcessTrackAsync(
+                            track,
+                            albumGroup.AlbumName,
+                            cfg,
+                            changeLogPath,
+                            cancellationToken).ConfigureAwait(false);
+                        if (changed)
+                        {
+                            Interlocked.Increment(ref albumWrites);
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "ExplicitFin playlist {Name} failed", plan.Name);
+                        _logger.LogWarning(ex, "ExplicitFin failed on track {Id} ({Name})", track.Id, track.Name);
                     }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "ExplicitFin playlist repair skipped");
+                    finally
+                    {
+                        gate.Release();
+                    }
+                })).ConfigureAwait(false);
+
+                totalWrites += albumWrites;
+                progress.Report(100.0 * albumIndex / Math.Max(1, albums.Count));
             }
 
             progress.Report(100);
             _logger.LogInformation(
-                "ExplicitFin finished: {Patches} writes, Deezer http {Dz}/{DzC}, MusicBrainz http {Mb}/{MbC}, Apple Music http {Am}/{AmC}",
-                list.Count,
+                "ExplicitFin finished: {Writes} title updates, Deezer http {Dz}, MusicBrainz http {Mb}",
+                totalWrites,
                 _deezer.HttpCount,
-                _deezer.CacheHits,
-                _musicBrainz.HttpCount,
-                _musicBrainz.CacheHits,
-                _appleMusic.HttpCount,
-                _appleMusic.CacheHits);
+                _musicBrainz.HttpCount);
         }
         finally
         {
@@ -247,292 +110,198 @@ public class ExplicitEngine
         }
     }
 
-    private async Task<bool?> ResolveExternalExplicitAsync(
-        Audio item,
+    private async Task<bool> ProcessTrackAsync(
+        Audio track,
+        string albumName,
         PluginConfiguration cfg,
-        ConcurrentDictionary<int, bool?> deezerTrackCache,
-        ConcurrentDictionary<string, bool?> musicBrainzCache,
-        ConcurrentDictionary<long, bool?> appleMusicCache,
+        string changeLogPath,
         CancellationToken cancellationToken)
     {
-        if (cfg.UseDeezer)
+        var title = Titles.StripMark(track.Name ?? string.Empty);
+        if (title.Length == 0)
         {
-            var deezer = await ResolveDeezerAsync(item, deezerTrackCache, cancellationToken).ConfigureAwait(false);
-            if (deezer is not null)
-            {
-                return deezer;
-            }
+            return false;
         }
 
-        if (cfg.UseMusicBrainz)
+        var artist = PrimaryArtist(track);
+        var album = Titles.StripMark(
+            string.IsNullOrWhiteSpace(albumName) ? (track.Album ?? string.Empty) : albumName);
+
+        var (result, source) = await ResolveAsync(title, artist, album, cancellationToken).ConfigureAwait(false);
+        var decision = Decide(result, cfg.EffectiveDualVersionPreference);
+        if (decision is null)
         {
-            var musicBrainz = await ResolveMusicBrainzAsync(item, musicBrainzCache, cancellationToken).ConfigureAwait(false);
-            if (musicBrainz is not null)
-            {
-                return musicBrainz;
-            }
+            return false;
         }
 
-        if (cfg.UseAppleMusic)
+        var desired = Titles.DesiredTitle(track.Name ?? string.Empty, decision.Value);
+        if (string.Equals(track.Name, desired, StringComparison.Ordinal) || desired.Length == 0)
         {
-            var appleMusic = await ResolveAppleMusicAsync(item, appleMusicCache, cancellationToken).ConfigureAwait(false);
-            if (appleMusic is not null)
-            {
-                return appleMusic;
-            }
+            return false;
         }
 
-        return null;
+        var oldName = track.Name ?? string.Empty;
+        track.Name = desired;
+        await _library.UpdateItemAsync(
+            track,
+            track.GetParent() ?? track,
+            ItemUpdateType.MetadataEdit,
+            cancellationToken).ConfigureAwait(false);
+
+        var decisionLabel = decision.Value ? "explicit" : "clean";
+        _logger.LogInformation(
+            "ExplicitFin renamed {Id}: {Old} → {New} ({Source}, {Decision})",
+            track.Id,
+            oldName,
+            desired,
+            source,
+            decisionLabel);
+
+        AppendChangeLog(changeLogPath, track.Id, oldName, desired, source, decisionLabel);
+        return true;
     }
 
-    private async Task<bool?> ResolveDeezerAsync(
-        Audio item,
-        ConcurrentDictionary<int, bool?> cache,
+    private async Task<(ExplicitSearchResult Result, string Source)> ResolveAsync(
+        string title,
+        string artist,
+        string album,
         CancellationToken cancellationToken)
     {
-        var idText = item.GetProviderId("Deezer");
-        if (!int.TryParse(idText, out var trackId) || trackId <= 0)
+        var deezer = await _deezer.SearchAsync(title, artist, album, cancellationToken).ConfigureAwait(false);
+        if (deezer.HasAny)
+        {
+            return (deezer, "deezer");
+        }
+
+        var musicBrainz = await _musicBrainz.SearchAsync(title, artist, album, cancellationToken).ConfigureAwait(false);
+        if (musicBrainz.HasAny)
+        {
+            return (musicBrainz, "musicbrainz");
+        }
+
+        return (ExplicitSearchResult.Empty, "none");
+    }
+
+    /// <summary>
+    /// Returns true = mark explicit, false = ensure clean (no mark), null = don't touch.
+    /// </summary>
+    internal static bool? Decide(ExplicitSearchResult result, DualVersionMode preference)
+    {
+        if (!result.HasAny)
         {
             return null;
         }
 
-        if (cache.TryGetValue(trackId, out var hit))
+        if (result.HasBoth)
         {
-            return hit;
+            return preference switch
+            {
+                DualVersionMode.PreferExplicit => true,
+                DualVersionMode.PreferClean => false,
+                _ => null
+            };
         }
 
-        var value = await _deezer.GetTrackExplicitAsync(trackId, cancellationToken).ConfigureAwait(false);
-        cache[trackId] = value;
-        return value;
+        if (result.HasExplicit)
+        {
+            return true;
+        }
+
+        return false;
     }
 
-    private static Dictionary<Guid, List<Audio>> GroupTracksByAlbum(IReadOnlyList<Audio> tracks, IReadOnlyList<MusicAlbum> albums)
+    private static string PrimaryArtist(Audio track)
     {
-        var map = albums.ToDictionary(a => a.Id, _ => new List<Audio>());
-        var albumsByName = albums
-            .GroupBy(a => Titles.StripMark(a.Name ?? string.Empty).Trim(), StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+        var artists = track.Artists;
+        if (artists is { Count: > 0 } && !string.IsNullOrWhiteSpace(artists[0]))
+        {
+            return artists[0].Trim();
+        }
 
+        var albumArtists = track.AlbumArtists;
+        if (albumArtists is { Count: > 0 } && !string.IsNullOrWhiteSpace(albumArtists[0]))
+        {
+            return albumArtists[0].Trim();
+        }
+
+        return string.Empty;
+    }
+
+    private static List<AlbumGroup> GroupByAlbum(IReadOnlyList<Audio> tracks)
+    {
+        var map = new Dictionary<string, AlbumGroup>(StringComparer.OrdinalIgnoreCase);
         foreach (var track in tracks)
         {
-            if (track.GetParent() is MusicAlbum parent && map.ContainsKey(parent.Id))
+            string key;
+            string albumName;
+            if (track.GetParent() is MusicAlbum parent && parent.Id != Guid.Empty)
             {
-                map[parent.Id].Add(track);
-                continue;
+                key = "id:" + parent.Id.ToString("N");
+                albumName = Titles.StripMark(parent.Name ?? string.Empty);
+            }
+            else
+            {
+                albumName = Titles.StripMark(track.Album ?? string.Empty);
+                key = albumName.Length > 0
+                    ? "name:" + albumName.ToLowerInvariant()
+                    : "track:" + track.Id.ToString("N");
             }
 
-            var albumName = Titles.StripMark(track.Album ?? string.Empty).Trim();
-            if (albumName.Length > 0 && albumsByName.TryGetValue(albumName, out var match))
+            if (!map.TryGetValue(key, out var group))
             {
-                map[match.Id].Add(track);
-            }
-        }
-
-        return map;
-    }
-
-    private static bool IsTrackExplicit(Audio track, Patch? patch, PluginConfiguration cfg)
-    {
-        if (patch?.Explicit == true)
-        {
-            return true;
-        }
-
-        if (patch?.Explicit == false)
-        {
-            return false;
-        }
-
-        if (patch?.Name is not null)
-        {
-            return Titles.HasExplicitMark(patch.Name);
-        }
-
-        return HasAnyTag(track, cfg.EffectiveExplicitTags) || Titles.HasExplicitMark(track.Name);
-    }
-
-    private static string? AlbumTitlePatch(string current, bool explicitFlag)
-    {
-        var desired = Titles.DesiredTitle(current, explicitFlag);
-        return current == desired ? null : desired;
-    }
-
-    private async Task<bool?> ResolveMusicBrainzAsync(
-        Audio item,
-        ConcurrentDictionary<string, bool?> cache,
-        CancellationToken cancellationToken)
-    {
-        var recordingId = item.GetProviderId("MusicBrainzRecording")
-            ?? item.GetProviderId("MusicBrainz");
-
-        if (string.IsNullOrWhiteSpace(recordingId))
-        {
-            var trackId = item.GetProviderId("MusicBrainzTrack");
-            if (!string.IsNullOrWhiteSpace(trackId))
-            {
-                recordingId = await _musicBrainz.ResolveRecordingIdFromTrackAsync(trackId, cancellationToken).ConfigureAwait(false);
-            }
-        }
-
-        if (string.IsNullOrWhiteSpace(recordingId))
-        {
-            return null;
-        }
-
-        recordingId = recordingId.Trim();
-        if (cache.TryGetValue(recordingId, out var hit))
-        {
-            return hit;
-        }
-
-        var value = await _musicBrainz.GetRecordingExplicitAsync(recordingId, cancellationToken).ConfigureAwait(false);
-        cache[recordingId] = value;
-        return value;
-    }
-
-    private async Task<bool?> ResolveAppleMusicAsync(
-        Audio item,
-        ConcurrentDictionary<long, bool?> cache,
-        CancellationToken cancellationToken)
-    {
-        var idText = item.GetProviderId("Apple Music")
-            ?? item.GetProviderId("iTunes");
-        if (!long.TryParse(idText, out var trackId) || trackId <= 0)
-        {
-            return null;
-        }
-
-        if (cache.TryGetValue(trackId, out var hit))
-        {
-            return hit;
-        }
-
-        var value = await _appleMusic.GetTrackExplicitAsync(trackId, cancellationToken).ConfigureAwait(false);
-        cache[trackId] = value;
-        return value;
-    }
-
-    private static bool HasExternalSource(PluginConfiguration cfg)
-        => cfg.UseDeezer || cfg.UseMusicBrainz || cfg.UseAppleMusic;
-
-    private static bool? ResolveTagWrite(Audio item, bool? externalExplicit, bool tagged, bool marked, PluginConfiguration cfg)
-    {
-        if (!cfg.WriteExplicitTags || cfg.EffectiveExplicitTags.Count == 0)
-        {
-            return null;
-        }
-
-        var hasExternalSource = HasExternalSource(cfg);
-
-        if (hasExternalSource && externalExplicit == true && !tagged)
-        {
-            return true;
-        }
-
-        if (hasExternalSource && externalExplicit == false && (tagged || marked))
-        {
-            return false;
-        }
-
-        if (hasExternalSource && externalExplicit == true && cfg.EffectiveExplicitTags.Any(t => !HasTag(item, t)))
-        {
-            return true;
-        }
-
-        return null;
-    }
-
-    private static string? TitlePatch(string current, bool? explicitFlag, PluginConfiguration cfg)
-    {
-        if (!cfg.RenameExplicitTitles || explicitFlag is null)
-        {
-            return null;
-        }
-
-        var desired = Titles.DesiredTitle(current, explicitFlag.Value);
-        return current == desired ? null : desired;
-    }
-
-    private async Task ApplyPatchAsync(Patch p, PluginConfiguration cfg, CancellationToken cancellationToken)
-    {
-        var item = p.Item ?? _library.GetItemById(p.ItemId);
-        if (item is null)
-        {
-            return;
-        }
-
-        var dirty = false;
-        if (p.Name is not null && item.Name != p.Name)
-        {
-            item.Name = p.Name;
-            dirty = true;
-        }
-
-        if (p.Album is not null && item is Audio audio && audio.Album != p.Album)
-        {
-            audio.Album = p.Album;
-            dirty = true;
-        }
-
-        var tags = item.Tags.ToList();
-        var tagDirty = false;
-        if (p.Explicit is not null)
-        {
-            var names = cfg.EffectiveExplicitTags;
-            tags = tags.Where(t => !names.Any(n => t.Equals(n, StringComparison.OrdinalIgnoreCase))).ToList();
-            if (p.Explicit.Value)
-            {
-                foreach (var n in names)
-                {
-                    if (!tags.Any(t => t.Equals(n, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        tags.Add(n);
-                    }
-                }
+                group = new AlbumGroup(albumName);
+                map[key] = group;
             }
 
-            tagDirty = true;
+            group.Tracks.Add(track);
         }
 
-        if (tagDirty)
-        {
-            item.Tags = tags.ToArray();
-            dirty = true;
-        }
+        return map.Values.ToList();
+    }
 
-        if (dirty)
+    private void AppendChangeLog(
+        string path,
+        Guid itemId,
+        string oldName,
+        string newName,
+        string source,
+        string decision)
+    {
+        try
         {
-            await _library.UpdateItemAsync(item, item.GetParent() ?? item, ItemUpdateType.MetadataEdit, cancellationToken).ConfigureAwait(false);
+            var dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
+            var line = string.Join('\t',
+                DateTime.UtcNow.ToString("o"),
+                itemId.ToString("N"),
+                Escape(oldName),
+                Escape(newName),
+                source,
+                decision);
+            File.AppendAllText(path, line + Environment.NewLine, Encoding.UTF8);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "ExplicitFin could not write change log");
         }
     }
 
-    private static bool HasAnyTag(BaseItem item, IReadOnlyList<string> names)
-        => names.Any(n => HasTag(item, n));
+    private static string Escape(string value)
+        => value.Replace('\t', ' ').Replace('\r', ' ').Replace('\n', ' ');
 
-    private static bool HasTag(BaseItem item, string name)
-        => item.Tags.Any(t => t.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-    private sealed class Patch
+    private sealed class AlbumGroup
     {
-        public Guid ItemId { get; init; }
-
-        public BaseItem? Item { get; init; }
-
-        public string? Name { get; init; }
-
-        public string? Album { get; init; }
-
-        public bool? Explicit { get; init; }
-
-        public bool Empty => Name is null && Album is null && Explicit is null;
-
-        public Patch Merge(Patch src) => new()
+        public AlbumGroup(string albumName)
         {
-            ItemId = ItemId,
-            Item = Item ?? src.Item,
-            Name = src.Name ?? Name,
-            Album = src.Album ?? Album,
-            Explicit = src.Explicit ?? Explicit
-        };
+            AlbumName = albumName;
+        }
+
+        public string AlbumName { get; }
+
+        public List<Audio> Tracks { get; } = [];
     }
 }

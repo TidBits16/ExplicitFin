@@ -1,18 +1,18 @@
 # ExplicitFin
 
-A Jellyfin plugin that manages **explicit tags** and **title marks** on music tracks — separate from [Deezer Genres](https://github.com/TidBits16/deezer-genres).
+A Jellyfin plugin that marks **explicit track titles** by searching **Deezer**, then **MusicBrainz**, using title + artist + album (90% match minimum).
 
 **Jellyfin 10.11+** · runs as a scheduled task.
 
-## Sources
+## How it works
 
-- **Deezer** — look up explicit status via the Deezer provider ID on each track (when present; on by default)
-- **MusicBrainz** — check recording tags and disambiguation via MusicBrainz recording or track ID
-- **Apple Music** — look up `trackExplicitness` via Apple Music or iTunes provider ID
+1. For each album, for each track: strip your configured mark from the title, then search Deezer.
+2. Keep hits that match title, artist, and album at ≥90% similarity.
+3. If Deezer finds nothing usable, try MusicBrainz the same way.
+4. If the track is treated as explicit, append or prepend your mark (default **🅴**).
+5. Every rename is written to the Jellyfin log and to `ExplicitFin-changes.log` under the plugin configurations folder.
 
-Default title mark is **🅴** (appended after the track name). Albums get the same mark when any track on them is explicit.
-
-Never tags album entities with Jellyfin tags (only track tags).
+When both explicit and clean versions match, use the dashboard setting: prefer explicit, prefer clean, or don't touch.
 
 ## Install
 
@@ -24,4 +24,4 @@ Never tags album entities with Jellyfin tags (only track tags).
 
 ## With Deezer Genres
 
-Install both if you want Deezer genres and explicit tagging. They run as separate scheduled tasks.
+Install both if you want Deezer genres and explicit title marks. They run as separate scheduled tasks.

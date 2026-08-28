@@ -1,12 +1,12 @@
 {
   "guid": "f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f",
   "name": "ExplicitFin",
-  "description": "Jellyfin explicit tags and title marks from your tags or Deezer.",
-  "overview": "Explicit tagging for Jellyfin music.",
+  "description": "Marks explicit track titles via Deezer then MusicBrainz title/artist/album search.",
+  "overview": "Explicit title marking for Jellyfin music.",
   "owner": "TidBits16",
   "category": "Metadata",
   "imageUrl": "",
-  "version": "1.2.0.0",
+  "version": "2.0.0.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Repository renamed to ExplicitFin on GitHub."
+  "changelog": "Simplify to title marking: Deezer→MusicBrainz search, dual-version preference, change log. Drop tags, album marks, Apple Music, playlist repair, disk cache."
 }
