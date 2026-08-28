@@ -18,8 +18,8 @@ When both explicit and clean versions match, use the dashboard setting: prefer e
 
 1. **Dashboard → Plugins → Repositories** → add:
    - Name: `ExplicitFin`
-   - URL: `https://cdn.jsdelivr.net/gh/TidBits16/ExplicitFin@main/manifest.json`
-2. **Catalog** → install → restart when asked.
+   - URL: `https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/manifest.json`
+2. **Catalog** → refresh → install **ExplicitFin: Visually Mark Your Songs** → restart when asked.
 3. Configure under **Plugins → ExplicitFin: Visually Mark Your Songs**, or run from **Scheduled Tasks**.
 
 ## With Deezer Genres
