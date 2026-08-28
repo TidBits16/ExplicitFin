@@ -12,7 +12,7 @@
                     <div class="sectionTitleContainer flex align-items-center">
                         <h2 class="sectionTitle">ExplicitFin: Visually Mark Your Songs</h2>
                     </div>
-                    <p>Marks explicit track titles by searching metadata providers by title, artist, and album. Logs every rename.</p>
+                    <p>Marks explicit track titles and optional Jellyfin tags by searching metadata providers by title, artist, and album. Logs every rename.</p>
 
                     <div class="verticalSection">
                         <h3 class="checkboxListLabel">Metadata providers</h3>
@@ -38,6 +38,21 @@
                                 <option value="append">After the title</option>
                                 <option value="prepend">Before the title</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <div class="verticalSection">
+                        <h3 class="checkboxListLabel">Jellyfin tags</h3>
+                        <div class="checkboxContainer">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="WriteExplicitTags" />
+                                <span>Add tags on explicit tracks</span>
+                            </label>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="ExplicitTags">Tag names</label>
+                            <input is="emby-input" type="text" id="ExplicitTags" />
+                            <div class="fieldDescription">Comma-separated. Added when a track is treated as explicit; removed when treated as clean. Useful for Jellyfin tag filters.</div>
                         </div>
                     </div>
 
@@ -223,6 +238,8 @@
                 document.querySelector('#ExplicitMark').value = mark || '🅴';
                 document.querySelector('#ExplicitMarkPlacement').value =
                     (config.ExplicitMarkPlacement || 'append').toLowerCase() === 'prepend' ? 'prepend' : 'append';
+                document.querySelector('#WriteExplicitTags').checked = config.WriteExplicitTags !== false;
+                document.querySelector('#ExplicitTags').value = config.ExplicitTags || 'Explicit';
                 document.querySelector('#MinTitleSimilarity').value = config.MinTitleSimilarity || 0.90;
                 document.querySelector('#DualVersionPreference').value = normalizeDual(config.DualVersionPreference);
                 document.querySelector('#Workers').value = config.Workers || 0;
@@ -237,6 +254,8 @@
                     config.MusicBrainzContact = document.querySelector('#MusicBrainzContact').value;
                     config.ExplicitMark = document.querySelector('#ExplicitMark').value;
                     config.ExplicitMarkPlacement = document.querySelector('#ExplicitMarkPlacement').value;
+                    config.WriteExplicitTags = document.querySelector('#WriteExplicitTags').checked;
+                    config.ExplicitTags = document.querySelector('#ExplicitTags').value;
                     config.MinTitleSimilarity = parseFloat(document.querySelector('#MinTitleSimilarity').value) || 0.90;
                     config.DualVersionPreference = document.querySelector('#DualVersionPreference').value;
                     config.Workers = parseInt(document.querySelector('#Workers').value, 10) || 0;

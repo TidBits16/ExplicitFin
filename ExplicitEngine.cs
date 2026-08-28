@@ -135,13 +135,20 @@ public class ExplicitEngine
         }
 
         var desired = Titles.DesiredTitle(track.Name ?? string.Empty, decision.Value);
-        if (string.Equals(track.Name, desired, StringComparison.Ordinal) || desired.Length == 0)
+        var nameChanged = desired.Length > 0 && !string.Equals(track.Name, desired, StringComparison.Ordinal);
+        var tagsChanged = ApplyExplicitTags(track, decision.Value, cfg);
+
+        if (!nameChanged && !tagsChanged)
         {
             return false;
         }
 
         var oldName = track.Name ?? string.Empty;
-        track.Name = desired;
+        if (nameChanged)
+        {
+            track.Name = desired;
+        }
+
         await _library.UpdateItemAsync(
             track,
             track.GetParent() ?? track,
@@ -149,16 +156,76 @@ public class ExplicitEngine
             cancellationToken).ConfigureAwait(false);
 
         var decisionLabel = decision.Value ? "explicit" : "clean";
-        _logger.LogInformation(
-            "ExplicitFin renamed {Id}: {Old} → {New} ({Source}, {Decision})",
-            track.Id,
-            oldName,
-            desired,
-            source,
-            decisionLabel);
+        if (nameChanged)
+        {
+            _logger.LogInformation(
+                "ExplicitFin renamed {Id}: {Old} → {New} ({Source}, {Decision})",
+                track.Id,
+                oldName,
+                desired,
+                source,
+                decisionLabel);
 
-        AppendChangeLog(changeLogPath, track.Id, oldName, desired, source, decisionLabel);
+            AppendChangeLog(changeLogPath, track.Id, oldName, desired, source, decisionLabel);
+        }
+        else
+        {
+            _logger.LogInformation(
+                "ExplicitFin updated tags on {Id} ({Name}) ({Source}, {Decision})",
+                track.Id,
+                track.Name,
+                source,
+                decisionLabel);
+        }
+
         return true;
+    }
+
+    private static bool ApplyExplicitTags(Audio track, bool isExplicit, PluginConfiguration cfg)
+    {
+        if (!cfg.WriteExplicitTags)
+        {
+            return false;
+        }
+
+        var names = cfg.EffectiveExplicitTags;
+        if (names.Count == 0)
+        {
+            return false;
+        }
+
+        var tags = (track.Tags ?? []).ToList();
+        var changed = false;
+
+        if (isExplicit)
+        {
+            foreach (var name in names)
+            {
+                if (!tags.Any(t => t.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                {
+                    tags.Add(name);
+                    changed = true;
+                }
+            }
+        }
+        else
+        {
+            var filtered = tags
+                .Where(t => !names.Any(n => t.Equals(n, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+            if (filtered.Count != tags.Count)
+            {
+                tags = filtered;
+                changed = true;
+            }
+        }
+
+        if (changed)
+        {
+            track.Tags = tags.ToArray();
+        }
+
+        return changed;
     }
 
     private async Task<(ExplicitSearchResult Result, string Source)> ResolveAsync(

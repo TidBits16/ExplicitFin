@@ -6,7 +6,7 @@
   "owner": "TidBits16",
   "category": "Metadata",
   "imageUrl": "",
-  "version": "2.0.2.0",
+  "version": "2.0.3.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Rename display title to ExplicitFin: Visually Mark Your Songs."
+  "changelog": "Add optional Jellyfin tags on explicit tracks (default Explicit) for library filtering."
 }

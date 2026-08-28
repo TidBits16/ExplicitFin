@@ -24,6 +24,12 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>append or prepend.</summary>
     public string ExplicitMarkPlacement { get; set; } = "append";
 
+    /// <summary>Add/remove Jellyfin tags on tracks when explicit status is known.</summary>
+    public bool WriteExplicitTags { get; set; } = true;
+
+    /// <summary>Comma-separated Jellyfin tag names (default Explicit).</summary>
+    public string ExplicitTags { get; set; } = "Explicit";
+
     /// <summary>
     /// When both explicit and clean versions match:
     /// prefer_explicit | prefer_clean | dont_touch.
@@ -37,6 +43,12 @@ public class PluginConfiguration : BasePluginConfiguration
 
     public bool PrependExplicitMark
         => string.Equals(ExplicitMarkPlacement, "prepend", StringComparison.OrdinalIgnoreCase);
+
+    public IReadOnlyList<string> EffectiveExplicitTags
+        => (ExplicitTags ?? string.Empty)
+            .Split([',', ';', '\n'], StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
     public double EffectiveMinTitleSimilarity
         => MinTitleSimilarity <= 0 ? 0.90 : Math.Clamp(MinTitleSimilarity, 0.5, 1.0);

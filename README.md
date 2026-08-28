@@ -9,7 +9,7 @@ A Jellyfin plugin that marks **explicit track titles** by searching **Deezer**, 
 1. For each album, for each track: strip your configured mark from the title, then search Deezer.
 2. Keep hits that match title, artist, and album at ≥90% similarity.
 3. If Deezer finds nothing usable, try MusicBrainz the same way.
-4. If the track is treated as explicit, append or prepend your mark (default **🅴**).
+4. If the track is treated as explicit, append or prepend your mark (default **🅴**) and add Jellyfin tags (default **Explicit**) for filtering.
 5. Every rename is written to the Jellyfin log and to `ExplicitFin-changes.log` under the plugin configurations folder.
 
 When both explicit and clean versions match, use the dashboard setting: prefer explicit, prefer clean, or don't touch.
