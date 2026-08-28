@@ -5,9 +5,9 @@
     <AssemblyName>Jellyfin.Plugin.ExplicitTagger</AssemblyName>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>2.0.1.0</Version>
-    <FileVersion>2.0.1.0</FileVersion>
-    <AssemblyVersion>2.0.1.0</AssemblyVersion>
+    <Version>2.0.2.0</Version>
+    <FileVersion>2.0.2.0</FileVersion>
+    <AssemblyVersion>2.0.2.0</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Jellyfin.Controller" Version="10.11.0">

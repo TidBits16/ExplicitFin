@@ -18,7 +18,7 @@ public class ExplicitLibraryTask : IScheduledTask
         _logger = logger;
     }
 
-    public string Name => "ExplicitFin";
+    public string Name => "ExplicitFin: Visually Mark Your Songs";
 
     public string Key => "ExplicitFinLibrary";
 

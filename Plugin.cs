@@ -19,7 +19,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     public static Plugin? Instance { get; private set; }
 
-    public override string Name => "ExplicitFin";
+    public override string Name => "ExplicitFin: Visually Mark Your Songs";
 
     public override string Description =>
         "Marks explicit track titles by searching Deezer, then MusicBrainz, by title, artist, and album.";

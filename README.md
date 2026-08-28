@@ -1,4 +1,4 @@
-# ExplicitFin
+# ExplicitFin: Visually Mark Your Songs
 
 A Jellyfin plugin that marks **explicit track titles** by searching **Deezer**, then **MusicBrainz**, using title + artist + album (90% match minimum).
 
@@ -20,7 +20,7 @@ When both explicit and clean versions match, use the dashboard setting: prefer e
    - Name: `ExplicitFin`
    - URL: `https://cdn.jsdelivr.net/gh/TidBits16/ExplicitFin@main/manifest.json`
 2. **Catalog** → install → restart when asked.
-3. Configure under **Plugins → ExplicitFin**, or run from **Scheduled Tasks**.
+3. Configure under **Plugins → ExplicitFin: Visually Mark Your Songs**, or run from **Scheduled Tasks**.
 
 ## With Deezer Genres
 
