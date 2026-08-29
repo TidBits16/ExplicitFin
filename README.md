@@ -24,16 +24,43 @@ A Jellyfin plugin that marks **explicit track titles** via **Deezer** (album tra
 
 When both explicit and clean versions match, use the dashboard setting: prefer explicit, prefer clean, or don't touch.
 
-## Install
+## Installing
+**Step 1**
+<p align="center">
+  <img src="repo_graphics/plugins.jpg" alt="Plugins Location" width="100%">
+</p>
 
-1. **Dashboard → Plugins → Repositories** → add:
-   - Name: `FinPlugins`
+**Dashboard --> Plugins --> Manage Repositories** --> **+ New Repository**:
+   - Name: `FinPlugins` (or whatever :P )
    - URL: `https://raw.githubusercontent.com/TidBits16/FinPlugins/main/manifest.json`
-2. **Catalog** → refresh → install/update **ExplicitFin: Mark Your Songs** → restart when asked.
-3. Configure under **Plugins → ExplicitFin: Mark Your Songs**, or run from **Scheduled Tasks**.
+   <br>
+   <br>
+   (p.s. this bundle includes my other FinPlugins since they are designed to work together. ***they are not required to install!***)
 
-(That same repository URL also lists the other Fin plugins: MusicFin, ExplicitFin, LyricFin, and ArtistFin.)
+<center><strong>**Then Restart JellyFin!**</strong></center>
 
-## With Deezer Genres
+**Step 2**
+<p align="center">
+  <img src="repo_graphics/where_to_find.jpg" alt="Where To Find Repo" width="100%">
+</p>
 
-Install both if you want Deezer genres and explicit title marks. They run as separate scheduled tasks.
+**Plugins** --> **All** --> **ExplicitFin: Mark Your Songs** --> **Install**
+
+<center><strong>**Once Installed, Restart JellyFin Again!**</strong></center>
+
+## Build Locally
+
+For development or packaging your own build:
+
+```bash
+dotnet build Jellyfin.Plugin.ExplicitTagger.csproj -c Release
+./scripts/package.sh
+```
+
+The release zip will be in `dist/`.
+
+Designed for **Jellyfin 10.11+** (you probably have this already :D )
+<p align="center">
+  <img src="logo.svg" alt="ExplicitFin Logo" width="128" height="128">
+</p>
+
