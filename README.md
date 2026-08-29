@@ -32,7 +32,7 @@ When both explicit and clean versions match, use the dashboard setting: prefer e
 2. **Catalog** → refresh → install/update **ExplicitFin: Mark Your Songs** → restart when asked.
 3. Configure under **Plugins → ExplicitFin: Mark Your Songs**, or run from **Scheduled Tasks**.
 
-(That same repository URL also lists MusicFin and LyricFin.)
+(That same repository URL also lists the other Fin plugins: MusicFin, ExplicitFin, LyricFin, and ArtistFin.)
 
 ## With Deezer Genres
 
