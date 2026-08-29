@@ -16,9 +16,6 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>Checked providers to try, in order.</summary>
     public MetadataProvider[] MetadataProviders { get; set; } = [];
 
-    /// <summary>Contact URL or email required by MusicBrainz for API User-Agent.</summary>
-    public string MusicBrainzContact { get; set; } = "https://github.com/TidBits16/ExplicitFin";
-
     public string ExplicitMark { get; set; } = "🅴";
 
     /// <summary>append or prepend.</summary>

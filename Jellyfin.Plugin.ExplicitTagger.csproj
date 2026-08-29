@@ -5,11 +5,12 @@
     <AssemblyName>Jellyfin.Plugin.ExplicitTagger</AssemblyName>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>2.0.4.0</Version>
-    <FileVersion>2.0.4.0</FileVersion>
-    <AssemblyVersion>2.0.4.0</AssemblyVersion>
+    <Version>2.0.5.0</Version>
+    <FileVersion>2.0.5.0</FileVersion>
+    <AssemblyVersion>2.0.5.0</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Jellyfin.Controller" Version="10.11.0">
       <PrivateAssets>all</PrivateAssets>
       <ExcludeAssets>runtime</ExcludeAssets>

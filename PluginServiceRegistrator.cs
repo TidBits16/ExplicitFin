@@ -8,6 +8,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
 {
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
+        serviceCollection.AddSingleton<HttpCache>();
         serviceCollection.AddSingleton<ExplicitEngine>();
         serviceCollection.AddSingleton<DeezerExplicitClient>();
         serviceCollection.AddSingleton<MusicBrainzExplicitClient>();

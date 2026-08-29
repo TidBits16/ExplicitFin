@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.ExplicitTagger.Configuration;
@@ -53,56 +54,61 @@ public class ExplicitEngine
                 workers);
 
             var changeLogPath = Path.Combine(_paths.PluginConfigurationsPath, "ExplicitFin-changes.log");
+            var searchMemo = new ConcurrentDictionary<string, (ExplicitSearchResult Result, string Source)>(
+                StringComparer.Ordinal);
             var totalWrites = 0;
-            var albumIndex = 0;
+            var completed = 0;
+            var totalTracks = Math.Max(1, tracks.Count);
 
-            foreach (var albumGroup in albums)
+            using var gate = new SemaphoreSlim(workers, workers);
+            await Task.WhenAll(albums.Select(async albumGroup =>
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                albumIndex++;
-                using var gate = new SemaphoreSlim(workers, workers);
-                var albumWrites = 0;
-
-                await Task.WhenAll(albumGroup.Tracks.Select(async track =>
+                await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+                try
                 {
-                    await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
-                    try
-                    {
-                        var changed = await ProcessTrackAsync(
-                            track,
-                            albumGroup.AlbumName,
-                            cfg,
-                            changeLogPath,
-                            cancellationToken).ConfigureAwait(false);
-                        if (changed)
+                    var writes = await ProcessAlbumAsync(
+                        albumGroup,
+                        cfg,
+                        changeLogPath,
+                        searchMemo,
+                        () =>
                         {
-                            Interlocked.Increment(ref albumWrites);
-                        }
-                    }
-                    catch (OperationCanceledException)
+                            var n = Interlocked.Increment(ref completed);
+                            progress.Report(100.0 * n / totalTracks);
+                        },
+                        cancellationToken).ConfigureAwait(false);
+                    if (writes > 0)
                     {
-                        throw;
+                        Interlocked.Add(ref totalWrites, writes);
                     }
-                    catch (Exception ex)
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "ExplicitFin failed on album {Album}", albumGroup.AlbumName);
+                    foreach (var _ in albumGroup.Tracks)
                     {
-                        _logger.LogWarning(ex, "ExplicitFin failed on track {Id} ({Name})", track.Id, track.Name);
+                        var n = Interlocked.Increment(ref completed);
+                        progress.Report(100.0 * n / totalTracks);
                     }
-                    finally
-                    {
-                        gate.Release();
-                    }
-                })).ConfigureAwait(false);
-
-                totalWrites += albumWrites;
-                progress.Report(100.0 * albumIndex / Math.Max(1, albums.Count));
-            }
+                }
+                finally
+                {
+                    gate.Release();
+                }
+            })).ConfigureAwait(false);
 
             progress.Report(100);
             _logger.LogInformation(
-                "ExplicitFin finished: {Writes} title updates, Deezer http {Dz}, MusicBrainz http {Mb}",
+                "ExplicitFin finished: {Writes} title updates, Deezer http {Dz}/{DzCache} cache, MusicBrainz http {Mb}/{MbCache} cache",
                 totalWrites,
                 _deezer.HttpCount,
-                _musicBrainz.HttpCount);
+                _deezer.CacheHits,
+                _musicBrainz.HttpCount,
+                _musicBrainz.CacheHits);
         }
         finally
         {
@@ -110,31 +116,115 @@ public class ExplicitEngine
         }
     }
 
+    private async Task<int> ProcessAlbumAsync(
+        AlbumGroup albumGroup,
+        PluginConfiguration cfg,
+        string changeLogPath,
+        ConcurrentDictionary<string, (ExplicitSearchResult Result, string Source)> searchMemo,
+        Action onTrackDone,
+        CancellationToken cancellationToken)
+    {
+        var writes = 0;
+        var albumName = albumGroup.AlbumName;
+        var threshold = cfg.EffectiveMinTitleSimilarity;
+        var providers = cfg.EffectiveMetadataProviders;
+        if (providers.Count == 0)
+        {
+            providers = PluginConfiguration.AllProvidersInOrder;
+        }
+
+        IReadOnlyList<DeezerAlbumTrack>? deezerAlbumTracks = null;
+        var deezerEnabled = providers.Contains(MetadataProvider.Deezer);
+        if (deezerEnabled && FuzzyMatch.Normalize(albumName).Length > 0)
+        {
+            var albumArtist = PrimaryAlbumArtist(albumGroup.Tracks);
+            deezerAlbumTracks = await _deezer.LoadAlbumTracksAsync(
+                albumName,
+                albumArtist,
+                threshold,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        foreach (var track in albumGroup.Tracks)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                var changed = await ProcessTrackAsync(
+                    track,
+                    albumName,
+                    cfg,
+                    changeLogPath,
+                    deezerAlbumTracks,
+                    searchMemo,
+                    cancellationToken).ConfigureAwait(false);
+                if (changed)
+                {
+                    writes++;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "ExplicitFin failed on track {Id} ({Name})", track.Id, track.Name);
+            }
+            finally
+            {
+                onTrackDone();
+            }
+        }
+
+        return writes;
+    }
+
     private async Task<bool> ProcessTrackAsync(
         Audio track,
         string albumName,
         PluginConfiguration cfg,
         string changeLogPath,
+        IReadOnlyList<DeezerAlbumTrack>? deezerAlbumTracks,
+        ConcurrentDictionary<string, (ExplicitSearchResult Result, string Source)> searchMemo,
         CancellationToken cancellationToken)
     {
-        var title = Titles.StripMark(track.Name ?? string.Empty);
-        if (title.Length == 0)
+        var artist = PrimaryArtist(track);
+        var searchTitle = Titles.StripTrailingArtist(
+            Titles.StripMark(track.Name ?? string.Empty, artist),
+            artist);
+        if (searchTitle.Length == 0)
         {
             return false;
         }
 
-        var artist = PrimaryArtist(track);
         var album = Titles.StripMark(
             string.IsNullOrWhiteSpace(albumName) ? (track.Album ?? string.Empty) : albumName);
 
-        var (result, source) = await ResolveAsync(title, artist, album, cfg, cancellationToken).ConfigureAwait(false);
+        ExplicitSearchResult result;
+        string source;
+
+        var albumHit = deezerAlbumTracks is { Count: > 0 }
+            ? DeezerExplicitClient.MatchOnAlbum(searchTitle, deezerAlbumTracks, cfg.EffectiveMinTitleSimilarity)
+            : null;
+        if (albumHit is not null)
+        {
+            result = albumHit;
+            source = "deezer-album";
+        }
+        else
+        {
+            (result, source) = await ResolveAsync(searchTitle, artist, album, cfg, searchMemo, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
         var decision = Decide(result, cfg.EffectiveDualVersionPreference);
         if (decision is null)
         {
             return false;
         }
 
-        var desired = Titles.DesiredTitle(track.Name ?? string.Empty, decision.Value);
+        var desired = Titles.DesiredTitle(track.Name ?? string.Empty, decision.Value, artist);
         var nameChanged = desired.Length > 0 && !string.Equals(track.Name, desired, StringComparison.Ordinal);
         var tagsChanged = ApplyExplicitTags(track, decision.Value, cfg);
 
@@ -179,6 +269,62 @@ public class ExplicitEngine
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Strips <paramref name="symbol"/> from every audio title that contains it.
+    /// Returns how many titles were updated.
+    /// </summary>
+    public async Task<int> RemoveSymbolAsync(string? symbol, CancellationToken cancellationToken)
+    {
+        var mark = (symbol ?? string.Empty).Trim();
+        if (mark.Length == 0)
+        {
+            mark = Titles.ExplicitMark;
+        }
+
+        Titles.UseStyle(mark, prepend: false);
+        try
+        {
+            var tracks = _library.GetItemList(new InternalItemsQuery
+            {
+                IncludeItemTypes = [BaseItemKind.Audio],
+                Recursive = true
+            }).OfType<Audio>().Where(t => t.Id != Guid.Empty).ToList();
+
+            var updated = 0;
+            foreach (var track in tracks)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var artist = PrimaryArtist(track);
+                var current = track.Name ?? string.Empty;
+                var cleaned = Titles.StripMark(current, artist);
+                if (cleaned.Length == 0 || string.Equals(current, cleaned, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                track.Name = cleaned;
+                await _library.UpdateItemAsync(
+                    track,
+                    track.GetParent() ?? track,
+                    ItemUpdateType.MetadataEdit,
+                    cancellationToken).ConfigureAwait(false);
+                updated++;
+                _logger.LogInformation(
+                    "ExplicitFin removed symbol from {Id}: {Old} → {New}",
+                    track.Id,
+                    current,
+                    cleaned);
+            }
+
+            _logger.LogInformation("ExplicitFin RemoveSymbol finished: {Count} titles updated", updated);
+            return updated;
+        }
+        finally
+        {
+            Titles.ResetStyle();
+        }
     }
 
     private static bool ApplyExplicitTags(Audio track, bool isExplicit, PluginConfiguration cfg)
@@ -233,8 +379,18 @@ public class ExplicitEngine
         string artist,
         string album,
         PluginConfiguration cfg,
+        ConcurrentDictionary<string, (ExplicitSearchResult Result, string Source)> searchMemo,
         CancellationToken cancellationToken)
     {
+        var memoKey = string.Join('\u001f',
+            FuzzyMatch.Normalize(title),
+            FuzzyMatch.Normalize(artist),
+            FuzzyMatch.Normalize(album));
+        if (searchMemo.TryGetValue(memoKey, out var cached))
+        {
+            return cached;
+        }
+
         var threshold = cfg.EffectiveMinTitleSimilarity;
         var providers = cfg.EffectiveMetadataProviders;
         if (providers.Count == 0)
@@ -264,11 +420,15 @@ public class ExplicitEngine
 
             if (result.HasAny)
             {
-                return (result, source);
+                var hit = (result, source);
+                searchMemo[memoKey] = hit;
+                return hit;
             }
         }
 
-        return (ExplicitSearchResult.Empty, "none");
+        var empty = (ExplicitSearchResult.Empty, "none");
+        searchMemo[memoKey] = empty;
+        return empty;
     }
 
     /// <summary>
@@ -311,6 +471,29 @@ public class ExplicitEngine
         if (albumArtists is { Count: > 0 } && !string.IsNullOrWhiteSpace(albumArtists[0]))
         {
             return albumArtists[0].Trim();
+        }
+
+        return string.Empty;
+    }
+
+    private static string PrimaryAlbumArtist(IReadOnlyList<Audio> tracks)
+    {
+        foreach (var track in tracks)
+        {
+            var albumArtists = track.AlbumArtists;
+            if (albumArtists is { Count: > 0 } && !string.IsNullOrWhiteSpace(albumArtists[0]))
+            {
+                return albumArtists[0].Trim();
+            }
+        }
+
+        foreach (var track in tracks)
+        {
+            var artist = PrimaryArtist(track);
+            if (artist.Length > 0)
+            {
+                return artist;
+            }
         }
 
         return string.Empty;

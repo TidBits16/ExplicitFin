@@ -1,13 +1,13 @@
 name: "ExplicitFin: Mark Your Songs"
 guid: "f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f"
-version: "2.0.4.0"
+version: "2.0.5.0"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
-overview: "Explicit title marks from Deezer then MusicBrainz search"
-description: "Scheduled-task plugin that marks explicit track titles by searching Deezer and MusicBrainz."
+overview: "Explicit title marks from Deezer album lookups, MusicBrainz fallback"
+description: "Scheduled-task plugin that marks explicit track titles via Deezer (album-first) and MusicBrainz."
 category: "Metadata"
 owner: "TidBits16"
 artifacts:
   - "Jellyfin.Plugin.ExplicitTagger.dll"
 changelog: >
-  Shorten display title to ExplicitFin: Mark Your Songs.
+  Faster album-scoped Deezer matching with HTTP cache; keep local titles; config cleanup and Remove symbol tool.

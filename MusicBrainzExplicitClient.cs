@@ -6,19 +6,24 @@ public sealed class MusicBrainzExplicitClient
 {
     private const string Base = "https://musicbrainz.org/ws/2";
     private const int MaxDetailLookups = 5;
+    private static readonly TimeSpan Ttl = TimeSpan.FromDays(7);
     private static readonly string[] ExplicitTags = ["explicit", "[explicit]", "nsfw", "not safe for work"];
 
     private readonly PacedHttp _http;
 
-    public MusicBrainzExplicitClient(IHttpClientFactory factory)
+    public MusicBrainzExplicitClient(IHttpClientFactory factory, HttpCache cache)
     {
         _http = new PacedHttp(
             factory,
+            cache,
             TimeSpan.FromMilliseconds(1100),
+            maxInFlight: 1,
             BuildUserAgent());
     }
 
     public int HttpCount => _http.HttpCount;
+
+    public int CacheHits => _http.CacheHits;
 
     public async Task<ExplicitSearchResult> SearchAsync(
         string title,
@@ -46,6 +51,7 @@ public sealed class MusicBrainzExplicitClient
 
         var query = string.Join(" AND ", parts);
         var payload = await _http.GetJsonAsync(
+            "musicbrainz/recording",
             Base + "/recording",
             new Dictionary<string, string>
             {
@@ -53,6 +59,7 @@ public sealed class MusicBrainzExplicitClient
                 ["fmt"] = "json",
                 ["limit"] = "25"
             },
+            Ttl,
             cancellationToken).ConfigureAwait(false);
 
         if (payload is null || payload.Value.TryGetProperty("error", out _))
@@ -85,8 +92,11 @@ public sealed class MusicBrainzExplicitClient
             }
 
             var detail = recording;
-            var needDetail = FuzzyMatch.Normalize(album).Length > 0
-                || !recording.TryGetProperty("tags", out _);
+            var needAlbum = FuzzyMatch.Normalize(album).Length > 0;
+            var hasReleases = HasReleases(recording);
+            var hasTags = HasTags(recording);
+            // Skip detail when search hit already has what we need (tags, and releases if album set).
+            var needDetail = (needAlbum && !hasReleases) || !hasTags;
             if (needDetail && details < MaxDetailLookups)
             {
                 var id = JsonUtil.Str(recording, "id");
@@ -128,12 +138,14 @@ public sealed class MusicBrainzExplicitClient
     private async Task<JsonElement?> GetRecordingAsync(string recordingId, CancellationToken cancellationToken)
     {
         var payload = await _http.GetJsonAsync(
+            "musicbrainz/recording/" + recordingId.Trim(),
             Base + "/recording/" + Uri.EscapeDataString(recordingId.Trim()),
             new Dictionary<string, string>
             {
                 ["inc"] = "artists+releases+tags",
                 ["fmt"] = "json"
             },
+            Ttl,
             cancellationToken).ConfigureAwait(false);
 
         if (payload is null || payload.Value.TryGetProperty("error", out _))
@@ -143,6 +155,14 @@ public sealed class MusicBrainzExplicitClient
 
         return payload;
     }
+
+    private static bool HasTags(JsonElement recording)
+        => recording.TryGetProperty("tags", out var tags) && tags.ValueKind == JsonValueKind.Array;
+
+    private static bool HasReleases(JsonElement recording)
+        => recording.TryGetProperty("releases", out var releases)
+           && releases.ValueKind == JsonValueKind.Array
+           && releases.GetArrayLength() > 0;
 
     private static string FirstArtistName(JsonElement recording)
     {
@@ -223,13 +243,5 @@ public sealed class MusicBrainzExplicitClient
     }
 
     private static string BuildUserAgent()
-    {
-        var contact = Plugin.Instance?.Configuration.MusicBrainzContact?.Trim();
-        if (string.IsNullOrEmpty(contact))
-        {
-            contact = "https://github.com/TidBits16/ExplicitFin";
-        }
-
-        return "ExplicitFin/2.0 ( " + contact + " )";
-    }
+        => "ExplicitFin/2.0 ( https://github.com/TidBits16/ExplicitFin )";
 }

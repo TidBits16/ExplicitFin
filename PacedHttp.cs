@@ -6,50 +6,91 @@ namespace Jellyfin.Plugin.ExplicitTagger;
 public class PacedHttp
 {
     private readonly HttpClient _http;
+    private readonly HttpCache _cache;
     private readonly SemaphoreSlim _pace = new(1, 1);
+    private readonly SemaphoreSlim _inFlight;
     private DateTime _next = DateTime.MinValue;
     private readonly TimeSpan _minDelay;
     private int _httpN;
+    private int _hits;
 
-    public PacedHttp(IHttpClientFactory factory, TimeSpan minDelay, string? userAgent = null)
+    public PacedHttp(
+        IHttpClientFactory factory,
+        HttpCache cache,
+        TimeSpan minDelay,
+        int maxInFlight = 2,
+        string? userAgent = null)
     {
         _http = factory.CreateClient();
         _http.Timeout = TimeSpan.FromSeconds(60);
+        var agent = userAgent?.Trim();
+        if (string.IsNullOrEmpty(agent))
+        {
+            agent = "explicitfin/2.0 (jellyfin-plugin)";
+        }
+
         if (!_http.DefaultRequestHeaders.UserAgent.Any())
         {
-            _http.DefaultRequestHeaders.TryAddWithoutValidation(
-                "User-Agent",
-                userAgent ?? "explicitfin/2.0 (jellyfin-plugin)");
+            _http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", agent);
         }
 
         _http.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/json");
+        _cache = cache;
         _minDelay = minDelay;
+        var slots = Math.Clamp(maxInFlight, 1, 6);
+        _inFlight = new SemaphoreSlim(slots, slots);
     }
 
     public int HttpCount => _httpN;
 
+    public int CacheHits => _hits;
+
     public async Task<JsonElement?> GetJsonAsync(
+        string cacheKey,
         string url,
         IDictionary<string, string>? query,
+        TimeSpan ttl,
         CancellationToken cancellationToken)
     {
         if (query is { Count: > 0 })
         {
-            var qs = string.Join('&', query.Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
+            var qs = string.Join('&', query.Select(kv =>
+                $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
             url += (url.Contains('?', StringComparison.Ordinal) ? "&" : "?") + qs;
         }
 
-        await PaceAsync(cancellationToken).ConfigureAwait(false);
-        using var response = await _http.GetAsync(url, cancellationToken).ConfigureAwait(false);
-        Interlocked.Increment(ref _httpN);
-        var text = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-        if (!response.IsSuccessStatusCode)
+        var key = cacheKey + " " + url;
+        if (_cache.TryGet(key, ttl, out var cached))
         {
-            return null;
+            Interlocked.Increment(ref _hits);
+            return cached;
         }
 
-        using var doc = JsonDocument.Parse(string.IsNullOrWhiteSpace(text) ? "{}" : text);
-        return doc.RootElement.Clone();
+        await _inFlight.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await PaceAsync(cancellationToken).ConfigureAwait(false);
+            using var response = await _http.GetAsync(url, cancellationToken).ConfigureAwait(false);
+            Interlocked.Increment(ref _httpN);
+            var text = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            using var doc = JsonDocument.Parse(string.IsNullOrWhiteSpace(text) ? "{}" : text);
+            var clone = doc.RootElement.Clone();
+            if (!clone.TryGetProperty("error", out _))
+            {
+                _cache.Set(key, clone);
+            }
+
+            return clone;
+        }
+        finally
+        {
+            _inFlight.Release();
+        }
     }
 
     private async Task PaceAsync(CancellationToken cancellationToken)
@@ -87,6 +128,38 @@ public static class JsonUtil
         return p.ValueKind == JsonValueKind.String ? p.GetString() ?? string.Empty : p.ToString();
     }
 
+    public static double Num(JsonElement el, string name)
+    {
+        if (!IsObject(el) || !el.TryGetProperty(name, out var p))
+        {
+            return 0;
+        }
+
+        return p.ValueKind switch
+        {
+            JsonValueKind.Number => p.GetDouble(),
+            JsonValueKind.String => double.TryParse(p.GetString(), out var n) ? n : 0,
+            _ => 0
+        };
+    }
+
+    public static string IdStr(JsonElement el, string name)
+    {
+        if (!IsObject(el) || !el.TryGetProperty(name, out var p))
+        {
+            return string.Empty;
+        }
+
+        return p.ValueKind switch
+        {
+            JsonValueKind.Number => p.TryGetInt64(out var n)
+                ? n.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                : p.GetRawText(),
+            JsonValueKind.String => p.GetString()?.Trim() ?? string.Empty,
+            _ => p.ToString()
+        };
+    }
+
     public static bool? Bool(JsonElement el, string name)
     {
         if (!IsObject(el) || !el.TryGetProperty(name, out var p))
@@ -100,5 +173,18 @@ public static class JsonUtil
             JsonValueKind.False => false,
             _ => null
         };
+    }
+
+    public static IEnumerable<JsonElement> Arr(JsonElement el, string name)
+    {
+        if (!IsObject(el) || !el.TryGetProperty(name, out var p) || p.ValueKind != JsonValueKind.Array)
+        {
+            yield break;
+        }
+
+        foreach (var x in p.EnumerateArray())
+        {
+            yield return x;
+        }
     }
 }

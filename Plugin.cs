@@ -22,7 +22,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public override string Name => "ExplicitFin: Mark Your Songs";
 
     public override string Description =>
-        "Marks explicit track titles by searching Deezer, then MusicBrainz, by title, artist, and album.";
+        "Marks explicit track titles via Deezer album lookups, with MusicBrainz as fallback.";
 
     public override Guid Id => PluginGuid;
 

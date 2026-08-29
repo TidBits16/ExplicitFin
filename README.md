@@ -1,16 +1,18 @@
 # ExplicitFin: Mark Your Songs
 
-A Jellyfin plugin that marks **explicit track titles** by searching **Deezer**, then **MusicBrainz**, using title + artist + album (90% match minimum).
+A Jellyfin plugin that marks **explicit track titles** via **Deezer** (album tracklists first), with **MusicBrainz** as a sparse fallback. Local spelling is never corrected — only your configured mark is added or removed.
 
 **Jellyfin 10.11+** · runs as a scheduled task.
 
 ## How it works
 
-1. For each album, for each track: strip your configured mark from the title, then search Deezer.
-2. Keep hits that match title, artist, and album at ≥90% similarity.
-3. If Deezer finds nothing usable, try MusicBrainz the same way.
-4. If the track is treated as explicit, append or prepend your mark (default **🅴**) and add Jellyfin tags (default **Explicit**) for filtering.
-5. Every rename is written to the Jellyfin log and to `ExplicitFin-changes.log` under the plugin configurations folder.
+1. Group library tracks by album. Resolve each album once on Deezer (album search + tracklist), then match local titles against that list.
+2. Unmatched tracks fall back to per-track Deezer search, then MusicBrainz. Responses are disk-cached (~7 days); identical lookups are memoized within a run.
+3. Strip your mark (and a trailing ` - Artist` if present) for matching only — the local spelling is never rewritten to the catalog title.
+4. If treated as explicit, append or prepend your mark (default **🅴**) on the existing title — e.g. `God is reawlly real [E] - AJR` — and optionally add Jellyfin tags (default **Explicit**).
+5. Every rename is logged and appended to `ExplicitFin-changes.log` under the plugin configurations folder.
+
+**Fast path:** leave Deezer enabled first (default). MusicBrainz is much slower (~1 req/s) and only runs when Deezer finds nothing.
 
 When both explicit and clean versions match, use the dashboard setting: prefer explicit, prefer clean, or don't touch.
 
@@ -18,8 +20,8 @@ When both explicit and clean versions match, use the dashboard setting: prefer e
 
 1. **Dashboard → Plugins → Repositories** → add:
    - Name: `ExplicitFin`
-   - URL: `https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/manifest.json`
-2. **Catalog** → refresh → install **ExplicitFin: Mark Your Songs** → restart when asked.
+   - URL: `https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/manifest.json?v=2.0.5.0`
+2. **Catalog** → refresh → install/update **ExplicitFin: Mark Your Songs** → restart when asked.
 3. Configure under **Plugins → ExplicitFin: Mark Your Songs**, or run from **Scheduled Tasks**.
 
 ## With Deezer Genres

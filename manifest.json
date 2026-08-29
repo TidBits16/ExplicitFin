@@ -2,12 +2,20 @@
   {
     "guid": "f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f",
     "name": "ExplicitFin: Mark Your Songs",
-    "description": "Marks explicit track titles via Deezer then MusicBrainz title/artist/album search.",
+    "description": "Marks explicit track titles via Deezer album lookups, with MusicBrainz fallback.",
     "overview": "Explicit title marking for Jellyfin music.",
     "owner": "TidBits16",
     "category": "Metadata",
     "imageUrl": "",
     "versions": [
+      {
+        "version": "2.0.5.0",
+        "changelog": "Faster album-scoped Deezer matching with HTTP cache; keep local titles; config cleanup and Remove symbol tool.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.5.0/explicitfin_2.0.5.0.zip",
+        "checksum": "1321f2fc318bab8bbc0600048c7d13d4",
+        "timestamp": "2026-08-29T00:42:53Z"
+      },
       {
         "version": "2.0.4.0",
         "changelog": "Shorten display title to ExplicitFin: Mark Your Songs.",
