@@ -32,22 +32,23 @@ When both explicit and clean versions match, use the dashboard setting: prefer e
   <img src="repo_graphics/plugins.jpg" alt="Plugins Location" width="100%">
 </p>
 
-<strong>Dashboard --> Plugins --> Manage Repositories</strong> --> <strong>+ New Repository</strong>:
-   Name: `FinPlugins` (or whatever :P )
-   URL: `https://raw.githubusercontent.com/TidBits16/FinPlugins/main/manifest.json`
-   <br>
-   (p.s. this bundle includes my other FinPlugins since they are designed to work together. <strong><em>they are not required to install!</em></strong>)
+<strong>Dashboard --> Plugins --> Manage Repositories</strong> --> <strong>+ New Repository</strong>:<br>
+Name: <code>FinPlugins</code> (or whatever :P )<br>
+URL: <code>https://raw.githubusercontent.com/TidBits16/FinPlugins/main/manifest.json</code><br>
 <br>
-<center><strong>Then Restart JellyFin!</strong></center>
+(p.s. this bundle includes my other FinPlugins since they are designed to work together. <strong><em>they are not required to install!</em></strong>)
+<br>
+<br>
+<strong>Then Restart JellyFin!</strong>
 
 <strong>Step 2</strong>
 <p align="center">
   <img src="repo_graphics/where_to_find.jpg" alt="Where To Find Repo" width="100%">
 </p>
 
-<strong>Plugins</strong> --> <strong>All</strong> --> <strong>ExplicitFin: Mark Your Songs</strong> --> <strong>Install</strong>
-
-<center><strong>Once Installed, Restart JellyFin Again!</strong></center>
+<strong>Plugins</strong> --> <strong>All</strong> --> <strong>ExplicitFin: Mark Your Songs</strong> --> <strong>Install</strong><br>
+<br>
+<strong>Once Installed, Restart JellyFin Again!</strong></center>
 
 ## Build Locally
 
