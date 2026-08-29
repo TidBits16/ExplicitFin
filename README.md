@@ -60,6 +60,8 @@ The release zip will be in `dist/`.
 
 Designed for **Jellyfin 10.11+** (you probably have this already :D)
 <p align="center">
-  <img src="repo_graphics/fin-family.svg" alt="Fin plugins" width="360">
+  <a href="https://github.com/TidBits16/FinPlugins">
+    <img src="repo_graphics/fin-family.svg" alt="Fin plugins" width="360">
+  </a>
 </p>
 
