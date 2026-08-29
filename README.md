@@ -63,8 +63,12 @@ The release zip will be in `dist/`.
 
 Designed for <strong>Jellyfin 10.11+</strong> (you probably have this already :D)
 <p align="center">
-  <a href="https://github.com/TidBits16/FinPlugins">
-    <img src="repo_graphics/fin-family.svg" alt="Fin plugins" width="360">
-  </a>
+  <a href="https://github.com/TidBits16/MusicFin"><img src="repo_graphics/musicfin.svg" alt="MusicFin" width="72" height="72"></a>
+  &nbsp;
+  <a href="https://github.com/TidBits16/ExplicitFin"><img src="repo_graphics/explicitfin.svg" alt="ExplicitFin" width="72" height="72"></a>
+  &nbsp;
+  <a href="https://github.com/TidBits16/LyricFin"><img src="repo_graphics/lyricfin.svg" alt="LyricFin" width="72" height="72"></a>
+  &nbsp;
+  <a href="https://github.com/TidBits16/ArtistFin"><img src="repo_graphics/artistfin.svg" alt="ArtistFin" width="72" height="72"></a>
 </p>
 </div>
