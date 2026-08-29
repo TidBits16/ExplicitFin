@@ -9,6 +9,14 @@
     "imageUrl": "",
     "versions": [
       {
+        "version": "2.0.7.0",
+        "changelog": "Refresh branding: flatter logo + 1920x1080 backdrop assets.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.7.0/explicitfin_2.0.7.0.zip",
+        "checksum": "3c2b3e4485ca363596d33a502fe6aed6",
+        "timestamp": "2026-08-29T01:47:00Z"
+      },
+      {
         "version": "2.0.6.0",
         "changelog": "Add plugin catalog icon.",
         "targetAbi": "10.11.0.0",

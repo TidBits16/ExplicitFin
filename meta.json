@@ -6,8 +6,8 @@
   "owner": "TidBits16",
   "category": "Metadata",
   "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/logo.png",
-  "version": "2.0.6.0",
+  "version": "2.0.7.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Add plugin catalog icon.",
+  "changelog": "Refresh branding: flatter logo + 1920x1080 backdrop assets.",
   "imagePath": "logo.png"
 }

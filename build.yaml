@@ -1,6 +1,6 @@
 name: "ExplicitFin: Mark Your Songs"
 guid: "f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f"
-version: "2.0.6.0"
+version: "2.0.7.0"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
 overview: "Explicit title marks from Deezer album lookups, MusicBrainz fallback"
@@ -11,4 +11,4 @@ artifacts:
   - "Jellyfin.Plugin.ExplicitTagger.dll"
   - "logo.png"
 changelog: >
-  Add plugin catalog icon.
+  Refresh branding: flatter logo + 1920x1080 backdrop assets.
