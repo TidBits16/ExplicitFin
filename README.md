@@ -1,30 +1,19 @@
 <div align="center">
-
-<p align="center">
-  <img src="logo.svg" alt="ExplicitFin" width="128" height="128">
-</p>
-
-# ExplicitFin: Mark Your Songs
-
 <p align="center">
   <img src="backdrop.svg" alt="ExplicitFin backdrop" width="100%">
 </p>
 
-A Jellyfin plugin that marks <strong>explicit track titles</strong> via <strong>Deezer</strong> (album tracklists first), with <strong>MusicBrainz</strong> as a sparse fallback. Local spelling is never corrected - only your configured mark is added or removed.
+# ExplicitFin: Mark Your Songs
 
-<strong>Jellyfin 10.11+</strong> · runs as a scheduled task.
+Don't you hate when your blasting your favorite song on your stereo just to remember "oh yeah, this song has a bunch of obscenities"...
 
-## How it works
+Most media players do not have a standardized way to stream "explicit" tags (or atleast don't respect them).
 
-Group library tracks by album. Resolve each album once on Deezer (album search + tracklist), then match local titles against that list.
-Unmatched tracks fall back to per-track Deezer search, then MusicBrainz. Responses are disk-cached (~7 days); identical lookups are memoized within a run.
-Strip your mark (and a trailing ` - Artist` if present) for matching only - the local spelling is never rewritten to the catalog title.
-If treated as explicit, append or prepend your mark (default <strong>🅴</strong>) on the existing title - e.g. `God is reawlly real [E] - AJR` - and optionally add Jellyfin tags (default <strong>Explicit</strong>).
-Every rename is logged and appended to `ExplicitFin-changes.log` under the plugin configurations folder.
+This plugin detects if a song is considered "Explicit" against a database and appends a little `🅴` symbol at the end of a song's title.
 
-<strong>Fast path:</strong> leave Deezer enabled first (default). MusicBrainz is much slower (~1 req/s) and only runs when Deezer finds nothing.
-
-When both explicit and clean versions match, use the dashboard setting: prefer explicit, prefer clean, or don't touch.
+<p align="center">
+  <img src="repo_graphics/example.jpg" alt="Plugins Location" width="100%">
+</p>
 
 ## Installing
 <strong>Step 1</strong>
