@@ -19,7 +19,7 @@ stage="$(mktemp -d)"
 trap 'rm -rf "$stage"' EXIT
 cp "bin/Release/net9.0/Jellyfin.Plugin.ExplicitTagger.dll" "$stage/"
 cp meta.json "$stage/"
-cp logo.png "$stage/"
+cp backdrop.svg "$stage/"
 
 mkdir -p dist
 zip_path="$root/dist/explicitfin_${version}.zip"
@@ -29,7 +29,7 @@ import sys, zipfile
 from pathlib import Path
 stage, zip_path = sys.argv[1], sys.argv[2]
 with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-    for name in ("Jellyfin.Plugin.ExplicitTagger.dll", "meta.json", "logo.png"):
+    for name in ("Jellyfin.Plugin.ExplicitTagger.dll", "meta.json", "backdrop.svg"):
         zf.write(Path(stage) / name, name)
 PY
 
@@ -81,6 +81,7 @@ entry["description"] = meta["description"]
 entry["overview"] = meta["overview"]
 entry["owner"] = meta["owner"]
 entry["category"] = meta["category"]
+entry["imageUrl"] = meta.get("imageUrl") or ""
 Path("manifest.json").write_text(json.dumps([entry], indent=2) + "\n")
 print(f"zip {source_url}")
 print(f"md5 {checksum}")

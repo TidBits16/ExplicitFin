@@ -6,7 +6,7 @@ public static class Titles
 {
     public const string ExplicitMark = "🅴";
 
-    private static readonly string[] ArtistSeparators = [" - ", " – ", " — ", " -- "];
+    private static readonly string[] ArtistSeparators = [" - ", " – ", " - ", " -- "];
 
     public static string Affix { get; set; } = ExplicitMark;
 
@@ -147,7 +147,7 @@ public static class Titles
     }
 
     /// <summary>
-    /// Builds the display title from the local name only — never substitutes a catalog title.
+    /// Builds the display title from the local name only - never substitutes a catalog title.
     /// When appending and a trailing " - Artist" is present, the mark goes before that suffix:
     /// <c>God is reawlly real [E] - AJR</c>.
     /// </summary>

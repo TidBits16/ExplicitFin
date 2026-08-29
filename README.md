@@ -1,6 +1,6 @@
 # ExplicitFin: Mark Your Songs
 
-A Jellyfin plugin that marks **explicit track titles** via **Deezer** (album tracklists first), with **MusicBrainz** as a sparse fallback. Local spelling is never corrected — only your configured mark is added or removed.
+A Jellyfin plugin that marks **explicit track titles** via **Deezer** (album tracklists first), with **MusicBrainz** as a sparse fallback. Local spelling is never corrected - only your configured mark is added or removed.
 
 **Jellyfin 10.11+** · runs as a scheduled task.
 
@@ -8,8 +8,8 @@ A Jellyfin plugin that marks **explicit track titles** via **Deezer** (album tra
 
 1. Group library tracks by album. Resolve each album once on Deezer (album search + tracklist), then match local titles against that list.
 2. Unmatched tracks fall back to per-track Deezer search, then MusicBrainz. Responses are disk-cached (~7 days); identical lookups are memoized within a run.
-3. Strip your mark (and a trailing ` - Artist` if present) for matching only — the local spelling is never rewritten to the catalog title.
-4. If treated as explicit, append or prepend your mark (default **🅴**) on the existing title — e.g. `God is reawlly real [E] - AJR` — and optionally add Jellyfin tags (default **Explicit**).
+3. Strip your mark (and a trailing ` - Artist` if present) for matching only - the local spelling is never rewritten to the catalog title.
+4. If treated as explicit, append or prepend your mark (default **🅴**) on the existing title - e.g. `God is reawlly real [E] - AJR` - and optionally add Jellyfin tags (default **Explicit**).
 5. Every rename is logged and appended to `ExplicitFin-changes.log` under the plugin configurations folder.
 
 **Fast path:** leave Deezer enabled first (default). MusicBrainz is much slower (~1 req/s) and only runs when Deezer finds nothing.
