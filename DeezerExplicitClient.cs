@@ -97,7 +97,7 @@ public sealed class DeezerExplicitClient
             return null;
         }
 
-        // Matched title but no usable explicit flag → treat as unknown (don't mark).
+        // Matched title but no usable explicit flag --> treat as unknown (don't mark).
         if (!hasExplicit && !hasClean)
         {
             return null;

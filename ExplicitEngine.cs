@@ -249,7 +249,7 @@ public class ExplicitEngine
         if (nameChanged)
         {
             _logger.LogInformation(
-                "ExplicitFin renamed {Id}: {Old} → {New} ({Source}, {Decision})",
+                "ExplicitFin renamed {Id}: {Old} --> {New} ({Source}, {Decision})",
                 track.Id,
                 oldName,
                 desired,
@@ -312,7 +312,7 @@ public class ExplicitEngine
                     cancellationToken).ConfigureAwait(false);
                 updated++;
                 _logger.LogInformation(
-                    "ExplicitFin removed symbol from {Id}: {Old} → {New}",
+                    "ExplicitFin removed symbol from {Id}: {Old} --> {New}",
                     track.Id,
                     current,
                     cleaned);
