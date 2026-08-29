@@ -5,8 +5,9 @@
   "overview": "Explicit title marking for Jellyfin music.",
   "owner": "TidBits16",
   "category": "Metadata",
-  "imageUrl": "",
-  "version": "2.0.5.0",
+  "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/logo.png",
+  "version": "2.0.6.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Faster album-scoped Deezer matching with HTTP cache; keep local titles; config cleanup and Remove symbol tool."
+  "changelog": "Add plugin catalog icon.",
+  "imagePath": "logo.png"
 }
