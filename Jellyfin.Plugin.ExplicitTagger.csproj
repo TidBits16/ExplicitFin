@@ -5,9 +5,9 @@
     <AssemblyName>Jellyfin.Plugin.ExplicitTagger</AssemblyName>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>2.0.8.0</Version>
-    <FileVersion>2.0.8.0</FileVersion>
-    <AssemblyVersion>2.0.8.0</AssemblyVersion>
+    <Version>2.0.9.0</Version>
+    <FileVersion>2.0.9.0</FileVersion>
+    <AssemblyVersion>2.0.9.0</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

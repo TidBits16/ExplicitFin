@@ -1,13 +1,13 @@
 {
   "guid": "f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f",
   "name": "ExplicitFin: Mark Your Songs",
-  "description": "Marks explicit track titles via Deezer album lookups, with MusicBrainz fallback.",
-  "overview": "Explicit title marking for Jellyfin music.",
+  "description": "Adds explicit symbols to track titles.",
+  "overview": "Adds explicit symbols to track titles.",
   "owner": "TidBits16",
   "category": "Metadata",
   "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
-  "version": "2.0.8.0",
+  "version": "2.0.9.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Use 1920x1080 backdrop SVG as the Jellyfin plugin catalog icon.",
+  "changelog": "Shorten catalog description.",
   "imagePath": "backdrop.svg"
 }
