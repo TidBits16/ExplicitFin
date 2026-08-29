@@ -1,4 +1,12 @@
+<p align="center">
+  <img src="logo.svg" alt="ExplicitFin" width="128" height="128">
+</p>
+
 # ExplicitFin: Mark Your Songs
+
+<p align="center">
+  <img src="backdrop.svg" alt="ExplicitFin backdrop" width="100%">
+</p>
 
 A Jellyfin plugin that marks **explicit track titles** via **Deezer** (album tracklists first), with **MusicBrainz** as a sparse fallback. Local spelling is never corrected - only your configured mark is added or removed.
 
