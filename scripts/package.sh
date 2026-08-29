@@ -8,7 +8,11 @@ version="$(python3 - <<'PY'
 import re
 from pathlib import Path
 text = Path("Jellyfin.Plugin.ExplicitTagger.csproj").read_text()
-print(re.search(r"<Version>([^<]+)</Version>", text).group(1))
+raw = re.search(r"<Version>([^<]+)</Version>", text).group(1).strip()
+parts = [p for p in raw.split(".") if p != ""]
+while len(parts) < 4:
+    parts.append("0")
+print(".".join(parts[:4]))
 PY
 )"
 
