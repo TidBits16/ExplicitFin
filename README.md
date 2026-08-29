@@ -19,7 +19,7 @@ When both explicit and clean versions match, use the dashboard setting: prefer e
 ## Install
 
 1. **Dashboard → Plugins → Repositories** → add:
-   - Name: `Fin Plugins`
+   - Name: `FinPlugins`
    - URL: `https://raw.githubusercontent.com/TidBits16/FinPlugins/main/manifest.json`
 2. **Catalog** → refresh → install/update **ExplicitFin: Mark Your Songs** → restart when asked.
 3. Configure under **Plugins → ExplicitFin: Mark Your Songs**, or run from **Scheduled Tasks**.
