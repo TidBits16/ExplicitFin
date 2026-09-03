@@ -6,8 +6,8 @@
   "owner": "TidBits16",
   "category": "Metadata",
   "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
-  "version": "2.1.0.0",
+  "version": "2.1.1.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Mark albums from Deezer or a track threshold, keep hand-added marks, skip decided tracks on scheduled runs, and force-refresh from Advanced.",
+  "changelog": "Default schedule: daily at 2:00 AM.",
   "imagePath": "backdrop.svg"
 }

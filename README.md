@@ -13,6 +13,8 @@ This plugin detects if a song is considered "Explicit" against a database and ap
 
 It can also mark the <strong>album</strong> when Deezer lists it as explicit, or when enough tracks already have the symbol.
 
+(Because no plugin is perfect), it even respects your manual edits.
+
 <p align="center">
   <img src="repo_graphics/example.jpg" alt="Plugins Location" width="100%">
 </p>
