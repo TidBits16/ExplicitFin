@@ -10,6 +10,13 @@ public sealed class DeezerAlbumTrack
     public bool? Explicit { get; init; }
 }
 
+public sealed class DeezerAlbumMatch
+{
+    public IReadOnlyList<DeezerAlbumTrack> Tracks { get; init; } = [];
+
+    public bool? Explicit { get; init; }
+}
+
 public sealed class DeezerExplicitClient
 {
     private const string Base = "https://api.deezer.com";
@@ -29,10 +36,10 @@ public sealed class DeezerExplicitClient
     public int CacheHits => _http.CacheHits;
 
     /// <summary>
-    /// Loads Deezer tracks for the best-matching album (one search + tracklist pages).
+    /// Loads Deezer tracks and album-level explicit flag for the best-matching album.
     /// Empty when the album cannot be resolved.
     /// </summary>
-    public async Task<IReadOnlyList<DeezerAlbumTrack>> LoadAlbumTracksAsync(
+    public async Task<DeezerAlbumMatch> LoadAlbumAsync(
         string album,
         string artist,
         double threshold,
@@ -41,16 +48,27 @@ public sealed class DeezerExplicitClient
         var albumNorm = FuzzyMatch.Normalize(album);
         if (albumNorm.Length == 0)
         {
-            return [];
+            return new DeezerAlbumMatch();
         }
 
-        var albumId = await FindAlbumIdAsync(album, artist, threshold, cancellationToken).ConfigureAwait(false);
-        if (albumId.Length == 0)
+        var hit = await FindAlbumAsync(album, artist, threshold, cancellationToken).ConfigureAwait(false);
+        if (string.IsNullOrEmpty(hit.Id))
         {
-            return [];
+            return new DeezerAlbumMatch();
         }
 
-        return await FetchAlbumTracksAsync(albumId, cancellationToken).ConfigureAwait(false);
+        var tracks = await FetchAlbumTracksAsync(hit.Id, cancellationToken).ConfigureAwait(false);
+        var explicitFlag = hit.Explicit;
+        if (explicitFlag is null)
+        {
+            explicitFlag = await FetchAlbumExplicitAsync(hit.Id, cancellationToken).ConfigureAwait(false);
+        }
+
+        return new DeezerAlbumMatch
+        {
+            Tracks = tracks,
+            Explicit = explicitFlag
+        };
     }
 
     /// <summary>
@@ -198,7 +216,9 @@ public sealed class DeezerExplicitClient
         return new ExplicitSearchResult(hasExplicit, hasClean);
     }
 
-    private async Task<string> FindAlbumIdAsync(
+    private readonly record struct AlbumHit(string Id, bool? Explicit);
+
+    private async Task<AlbumHit> FindAlbumAsync(
         string album,
         string artist,
         double threshold,
@@ -227,16 +247,17 @@ public sealed class DeezerExplicitClient
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Deezer album search failed for {Album}", album);
-            return string.Empty;
+            return default;
         }
 
         if (payload is null || !payload.Value.TryGetProperty("data", out var data)
             || data.ValueKind != JsonValueKind.Array)
         {
-            return string.Empty;
+            return default;
         }
 
         string bestId = string.Empty;
+        bool? bestExplicit = null;
         var bestScore = -1.0;
         var bestFans = -1;
         foreach (var hit in data.EnumerateArray())
@@ -273,10 +294,32 @@ public sealed class DeezerExplicitClient
                 bestScore = titleScore;
                 bestFans = fans;
                 bestId = id;
+                bestExplicit = ExplicitFrom(hit);
             }
         }
 
-        return bestId;
+        return bestId.Length == 0 ? default : new AlbumHit(bestId, bestExplicit);
+    }
+
+    private async Task<bool?> FetchAlbumExplicitAsync(string albumId, CancellationToken cancellationToken)
+    {
+        JsonElement? payload;
+        try
+        {
+            payload = await _http.GetJsonAsync(
+                "deezer/album/" + albumId,
+                Base + "/album/" + albumId,
+                null,
+                Ttl,
+                cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Deezer album lookup failed for {AlbumId}", albumId);
+            return null;
+        }
+
+        return payload is null ? null : ExplicitFrom(payload.Value);
     }
 
     private async Task<IReadOnlyList<DeezerAlbumTrack>> FetchAlbumTracksAsync(

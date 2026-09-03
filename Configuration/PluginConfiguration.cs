@@ -27,6 +27,20 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>Comma-separated Jellyfin tag names (default Explicit).</summary>
     public string ExplicitTags { get; set; } = "Explicit";
 
+    /// <summary>Also mark album titles (and tags) when the album is explicit.</summary>
+    public bool MarkAlbums { get; set; } = true;
+
+    /// <summary>
+    /// Mark the album if at least this many tracks have the explicit symbol.
+    /// Deezer's album explicit flag still marks the album even when fewer tracks match.
+    /// </summary>
+    public int AlbumMinExplicitTracks { get; set; } = 1;
+
+    /// <summary>
+    /// Do not strip a symbol or Explicit tag the user added by hand, even when catalogs say clean.
+    /// </summary>
+    public bool KeepExistingMarks { get; set; } = true;
+
     /// <summary>
     /// When both explicit and clean versions match:
     /// prefer_explicit | prefer_clean | dont_touch.
@@ -46,6 +60,9 @@ public class PluginConfiguration : BasePluginConfiguration
             .Split([',', ';', '\n'], StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+    public int EffectiveAlbumMinExplicitTracks
+        => AlbumMinExplicitTracks <= 0 ? 1 : AlbumMinExplicitTracks;
 
     public double EffectiveMinTitleSimilarity
         => MinTitleSimilarity <= 0 ? 0.90 : Math.Clamp(MinTitleSimilarity, 0.5, 1.0);

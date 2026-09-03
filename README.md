@@ -11,6 +11,8 @@ Most media players do not have a standardized way to stream "explicit" tags (or 
 
 This plugin detects if a song is considered "Explicit" against a database and appends a little `🅴` symbol at the end of a song's title.
 
+It can also mark the <strong>album</strong> when Deezer lists it as explicit, or when enough tracks already have the symbol.
+
 <p align="center">
   <img src="repo_graphics/example.jpg" alt="Plugins Location" width="100%">
 </p>
@@ -25,7 +27,8 @@ This plugin detects if a song is considered "Explicit" against a database and ap
 Name: <code>FinPlugins</code> (or whatever :P )<br>
 URL: <code>https://raw.githubusercontent.com/TidBits16/FinPlugins/main/manifest.json</code><br>
 <br>
-(p.s. this bundle includes my other FinPlugins since they are designed to work together. <strong><em>they are not required to install!</em></strong>)
+(p.s. this bundle includes my other FinPlugins since they are designed to work together. <strong><em>they are not required to install!</em></strong>)<br>
+For just <strong>ExplicitFin</strong> you can use this URL: <code>https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/manifest.json</code>
 <br>
 <br>
 <strong>Then Restart JellyFin!</strong>
@@ -51,6 +54,8 @@ dotnet build Jellyfin.Plugin.ExplicitTagger.csproj -c Release
 The release zip will be in `dist/`.
 
 Designed for <strong>Jellyfin 10.11+</strong> (you probably have this already :D)
+<br>
+Licensed under the <a href="LICENSE">GNU General Public License v3.0</a>
 <p align="center">
   <a href="https://github.com/TidBits16/MusicFin"><img src="repo_graphics/musicfin.svg" alt="MusicFin" width="72" height="72"></a>
   &nbsp;

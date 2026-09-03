@@ -12,7 +12,7 @@
                     <div class="sectionTitleContainer flex align-items-center">
                         <h2 class="sectionTitle">ExplicitFin: Mark Your Songs</h2>
                     </div>
-                    <p>Adds explicit symbols to track titles.</p>
+                    <p>Adds explicit symbols to track titles, and optionally albums. Scheduled scans only touch tracks they have not decided yet.</p>
 
                     <div class="verticalSection">
                         <h3 class="checkboxListLabel">Metadata providers</h3>
@@ -34,6 +34,15 @@
                                 <option value="prepend">Before the title</option>
                             </select>
                         </div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="KeepExistingMarks" />
+                                <span>Keep existing marks</span>
+                            </label>
+                            <div class="fieldDescription checkboxDescription">
+                                If you add the symbol or an Explicit tag yourself, the first scan will keep it even if catalogs say clean. After that, scheduled scans skip the track.
+                            </div>
+                        </div>
                     </div>
 
                     <div class="verticalSection">
@@ -48,6 +57,20 @@
                             <label class="inputLabel inputLabelUnfocused" for="ExplicitTags">Tags</label>
                             <input is="emby-input" type="text" id="ExplicitTags" />
                             <div class="fieldDescription">Comma-separated.</div>
+                        </div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="MarkAlbums" />
+                                <span>Also mark albums</span>
+                            </label>
+                            <div class="fieldDescription checkboxDescription">
+                                Adds the symbol (and tags) to the album when Deezer lists it as explicit, or enough tracks already have the symbol.
+                            </div>
+                        </div>
+                        <div class="inputContainer" id="AlbumThresholdRow">
+                            <label class="inputLabel inputLabelUnfocused" for="AlbumMinExplicitTracks">Minimum explicit tracks</label>
+                            <input is="emby-input" type="number" id="AlbumMinExplicitTracks" min="1" step="1" />
+                            <div class="fieldDescription">Fallback when Deezer does not flag the album. 1 = any marked track.</div>
                         </div>
                     </div>
 
@@ -76,10 +99,19 @@
                             <div class="fieldDescription">Concurrency across albums. 0 = auto (CPU count).</div>
                         </div>
                         <div class="verticalSection" style="margin-top:1.5em">
+                            <h3 class="checkboxListLabel">Force refresh</h3>
+                            <button is="emby-button" type="button" id="ScanAllBtn" class="raised block">
+                                <span>Re-check every track</span>
+                            </button>
+                            <div class="fieldDescription" id="ScanAllStatus" style="margin-top:0.5em">
+                                Overwrites from catalogs. Hand-edits will be lost. Watch Dashboard --> Scheduled Tasks --> ExplicitFin: Mark Your Songs.
+                            </div>
+                        </div>
+                        <div class="verticalSection" style="margin-top:1.5em">
                             <h3 class="checkboxListLabel">Remove symbol</h3>
                             <div class="inputContainer">
                                 <input is="emby-input" type="text" id="RemoveSymbol" aria-label="Remove symbol" />
-                                <div class="fieldDescription">Incase you change your mind, use this to remove explicit symbols from track titles. A space is not required.</div>
+                                <div class="fieldDescription">Incase you change your mind, use this to remove explicit symbols from track and album titles. A space is not required.</div>
                             </div>
                             <button is="emby-button" type="button" id="RemoveSymbolBtn" class="raised block">
                                 <span>Remove</span>
@@ -225,6 +257,11 @@
                 document.querySelector('#ExplicitTagsRow').style.display = on ? '' : 'none';
             }
 
+            function syncAlbumUi() {
+                var on = document.querySelector('#MarkAlbums').checked;
+                document.querySelector('#AlbumThresholdRow').style.display = on ? '' : 'none';
+            }
+
             function applyConfig(config) {
                 var order = normalizeProviderOrder(
                     config.MetadataProviderOrder && config.MetadataProviderOrder.length
@@ -240,8 +277,12 @@
                 document.querySelector('#ExplicitMark').value = mark || '🅴';
                 document.querySelector('#ExplicitMarkPlacement').value =
                     (config.ExplicitMarkPlacement || 'append').toLowerCase() === 'prepend' ? 'prepend' : 'append';
+                document.querySelector('#KeepExistingMarks').checked = config.KeepExistingMarks !== false;
                 document.querySelector('#WriteExplicitTags').checked = config.WriteExplicitTags !== false;
                 document.querySelector('#ExplicitTags').value = config.ExplicitTags || 'Explicit';
+                document.querySelector('#MarkAlbums').checked = config.MarkAlbums !== false;
+                document.querySelector('#AlbumMinExplicitTracks').value =
+                    config.AlbumMinExplicitTracks > 0 ? config.AlbumMinExplicitTracks : 1;
                 document.querySelector('#MinTitleSimilarity').value = config.MinTitleSimilarity || 0.90;
                 document.querySelector('#DualVersionPreference').value = normalizeDual(config.DualVersionPreference);
                 document.querySelector('#Workers').value = config.Workers || 0;
@@ -249,6 +290,7 @@
                 document.querySelector('#RemoveSymbol').value = removeMark || '🅴';
                 document.querySelector('#RemoveSymbolStatus').textContent = '';
                 syncTagsUi();
+                syncAlbumUi();
             }
 
             function removeSymbolFromLibrary() {
@@ -267,11 +309,34 @@
                 }).then(function (result) {
                     var n = result && typeof result.Updated === 'number' ? result.Updated : 0;
                     status.textContent = n === 1
-                        ? 'Removed symbol from 1 track.'
-                        : 'Removed symbol from ' + n + ' tracks.';
+                        ? 'Removed symbol from 1 title.'
+                        : 'Removed symbol from ' + n + ' titles.';
                     Dashboard.hideLoadingMsg();
                 }).catch(function () {
                     status.textContent = 'Failed to remove symbol. Check the Jellyfin log.';
+                    Dashboard.hideLoadingMsg();
+                }).then(function () {
+                    btn.disabled = false;
+                });
+            }
+
+            function scanAll() {
+                var status = document.querySelector('#ScanAllStatus');
+                var btn = document.querySelector('#ScanAllBtn');
+                btn.disabled = true;
+                status.textContent = 'Queueing force refresh…';
+                Dashboard.showLoadingMsg();
+                return ApiClient.ajax({
+                    type: 'POST',
+                    url: ApiClient.getUrl('ExplicitFin/ScanAll'),
+                    contentType: 'application/json',
+                    dataType: 'json'
+                }).then(function () {
+                    status.textContent = 'Queued. Watch Dashboard --> Scheduled Tasks --> ExplicitFin: Mark Your Songs.';
+                    Dashboard.hideLoadingMsg();
+                }).catch(function (err) {
+                    var detail = (err && (err.message || err.statusText)) || 'unknown error';
+                    status.textContent = 'Could not queue refresh (' + detail + '). Check the Jellyfin log.';
                     Dashboard.hideLoadingMsg();
                 }).then(function () {
                     btn.disabled = false;
@@ -285,8 +350,11 @@
                     config.MetadataProviders = enabled.length ? enabled : ['Deezer'];
                     config.ExplicitMark = document.querySelector('#ExplicitMark').value;
                     config.ExplicitMarkPlacement = document.querySelector('#ExplicitMarkPlacement').value;
+                    config.KeepExistingMarks = document.querySelector('#KeepExistingMarks').checked;
                     config.WriteExplicitTags = document.querySelector('#WriteExplicitTags').checked;
                     config.ExplicitTags = document.querySelector('#ExplicitTags').value;
+                    config.MarkAlbums = document.querySelector('#MarkAlbums').checked;
+                    config.AlbumMinExplicitTracks = parseInt(document.querySelector('#AlbumMinExplicitTracks').value, 10) || 1;
                     config.MinTitleSimilarity = parseFloat(document.querySelector('#MinTitleSimilarity').value) || 0.90;
                     config.DualVersionPreference = document.querySelector('#DualVersionPreference').value;
                     config.Workers = parseInt(document.querySelector('#Workers').value, 10) || 0;
@@ -296,9 +364,14 @@
 
             document.querySelector('#ProviderList').addEventListener('click', onProviderListClick);
             document.querySelector('#WriteExplicitTags').addEventListener('change', syncTagsUi);
+            document.querySelector('#MarkAlbums').addEventListener('change', syncAlbumUi);
             document.querySelector('#RemoveSymbolBtn').addEventListener('click', function (e) {
                 e.preventDefault();
                 removeSymbolFromLibrary();
+            });
+            document.querySelector('#ScanAllBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                scanAll();
             });
 
             document.querySelector('#EfConfigPage').addEventListener('pageshow', function () {

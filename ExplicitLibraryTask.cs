@@ -23,7 +23,7 @@ public class ExplicitLibraryTask : IScheduledTask
     public string Key => "ExplicitFinLibrary";
 
     public string Description =>
-        "Searches Deezer then MusicBrainz by title, artist, and album; marks explicit track titles and logs changes.";
+        "Scheduled scans only mark tracks not decided yet. Force-refresh from plugin settings overwrites from catalogs.";
 
     public string Category => "Library";
 
