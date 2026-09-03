@@ -40,7 +40,7 @@
                                 <span>Keep existing marks</span>
                             </label>
                             <div class="fieldDescription checkboxDescription">
-                                If you add the symbol or an Explicit tag yourself, the first scan will keep it even if catalogs say clean. After that, scheduled scans skip the track.
+                                Keeps hand-added symbols/tags even if catalogs say clean.
                             </div>
                         </div>
                     </div>
@@ -64,7 +64,7 @@
                                 <span>Also mark albums</span>
                             </label>
                             <div class="fieldDescription checkboxDescription">
-                                Adds the symbol (and tags) to the album when Deezer lists it as explicit, or enough tracks already have the symbol.
+                                Mark albums when Deezer flags them, or enough tracks already have the symbol.
                             </div>
                         </div>
                         <div class="inputContainer" id="AlbumThresholdRow">
@@ -100,22 +100,26 @@
                         </div>
                         <div class="verticalSection" style="margin-top:1.5em">
                             <h3 class="checkboxListLabel">Force refresh</h3>
-                            <button is="emby-button" type="button" id="ScanAllBtn" class="raised block">
-                                <span>Re-check every track</span>
+                            <button is="emby-button" type="button" id="ScanAllBtn" class="raised block button-delete">
+                                <span>Force Re-check Every Track</span>
                             </button>
-                            <div class="fieldDescription" id="ScanAllStatus" style="margin-top:0.5em">
-                                Overwrites from catalogs. Hand-edits will be lost. Watch Dashboard --> Scheduled Tasks --> ExplicitFin: Mark Your Songs.
+                            <div class="fieldDescription" style="margin-top:0.5em">
+                                Overwrites existing marks! Don't use unless you know what you're doing!
                             </div>
+                            <div class="fieldDescription" id="ScanAllStatus" style="margin-top:0.5em"></div>
                         </div>
                         <div class="verticalSection" style="margin-top:1.5em">
                             <h3 class="checkboxListLabel">Remove symbol</h3>
                             <div class="inputContainer">
                                 <input is="emby-input" type="text" id="RemoveSymbol" aria-label="Remove symbol" />
-                                <div class="fieldDescription">Incase you change your mind, use this to remove explicit symbols from track and album titles. A space is not required.</div>
+                                <div class="fieldDescription">Removes this symbol from track and album titles.</div>
                             </div>
-                            <button is="emby-button" type="button" id="RemoveSymbolBtn" class="raised block">
-                                <span>Remove</span>
+                            <button is="emby-button" type="button" id="RemoveSymbolBtn" class="raised block button-delete">
+                                <span>Force Remove Symbol</span>
                             </button>
+                            <div class="fieldDescription" style="margin-top:0.5em">
+                                Removes existing marks! Don't use unless you know what you're doing!
+                            </div>
                             <div class="fieldDescription" id="RemoveSymbolStatus" style="margin-top:0.5em"></div>
                         </div>
                     </details>
@@ -332,7 +336,7 @@
                     contentType: 'application/json',
                     dataType: 'json'
                 }).then(function () {
-                    status.textContent = 'Queued. Watch Dashboard --> Scheduled Tasks --> ExplicitFin: Mark Your Songs.';
+                    status.textContent = 'Queued.';
                     Dashboard.hideLoadingMsg();
                 }).catch(function (err) {
                     var detail = (err && (err.message || err.statusText)) || 'unknown error';

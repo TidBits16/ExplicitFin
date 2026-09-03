@@ -6,8 +6,8 @@
   "owner": "TidBits16",
   "category": "Metadata",
   "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
-  "version": "2.1.1.0",
+  "version": "2.1.2.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Default schedule: daily at 2:00 AM.",
+  "changelog": "Clearer force-button labels, red destructive actions, and shorter help text.",
   "imagePath": "backdrop.svg"
 }
