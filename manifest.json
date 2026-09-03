@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
     "versions": [
       {
+        "version": "2.1.1.0",
+        "changelog": "Default schedule: daily at 2:00 AM.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.1.0/explicitfin_2.1.1.0.zip",
+        "checksum": "33ff7cfbdcac5b701408a756e6a332ad",
+        "timestamp": "2026-09-03T01:39:08Z"
+      },
+      {
         "version": "2.1.0.0",
         "changelog": "Mark albums from Deezer or a track threshold, keep hand-added marks, skip decided tracks on scheduled runs, and force-refresh from Advanced.",
         "targetAbi": "10.11.0.0",
