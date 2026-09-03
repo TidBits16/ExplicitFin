@@ -2,12 +2,20 @@
   {
     "guid": "f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f",
     "name": "ExplicitFin: Mark Your Songs",
-    "description": "Adds explicit symbols to track titles.",
+    "description": "Adds explicit symbols to track and album titles.",
     "overview": "Adds explicit symbols to track titles.",
     "owner": "TidBits16",
     "category": "Metadata",
     "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
     "versions": [
+      {
+        "version": "2.1.0.0",
+        "changelog": "Mark albums from Deezer or a track threshold, keep hand-added marks, skip decided tracks on scheduled runs, and force-refresh from Advanced.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.0.0/explicitfin_2.1.0.0.zip",
+        "checksum": "e60d901989abbd7a3890dd7e79050a1f",
+        "timestamp": "2026-09-03T00:59:01Z"
+      },
       {
         "version": "2.0.10.0",
         "changelog": "Normalize arrow punctuation in UI copy and logs.",
