@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
     "versions": [
       {
+        "version": "2.1.5.0",
+        "changelog": "Center logo + title on backdrop; fix ExplicitFin cutoff.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.5.0/explicitfin_2.1.5.0.zip",
+        "checksum": "0c7f1c23a842dc1c42353cfcf7b930e2",
+        "timestamp": "2026-09-14T16:12:51Z"
+      },
+      {
         "version": "2.1.4.0",
         "changelog": "Keep - prefix on scheduled task only (plugin catalog name unchanged).",
         "targetAbi": "10.11.0.0",
