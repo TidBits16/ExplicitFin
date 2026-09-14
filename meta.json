@@ -6,8 +6,8 @@
   "owner": "TidBits16",
   "category": "Metadata",
   "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
-  "version": "2.1.5.0",
+  "version": "2.1.6.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Center logo + title on backdrop; fix ExplicitFin cutoff.",
+  "changelog": "Add FinFamily tagline under logo on backdrop.",
   "imagePath": "backdrop.svg"
 }
