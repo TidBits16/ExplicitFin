@@ -19,7 +19,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     public static Plugin? Instance { get; private set; }
 
-    public override string Name => "ExplicitFin: Mark Your Songs";
+    public override string Name => "- ExplicitFin: Mark Your Songs";
 
     public override string Description =>
         "Adds explicit symbols to track and album titles.";
