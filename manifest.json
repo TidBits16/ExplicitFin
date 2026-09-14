@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
     "versions": [
       {
+        "version": "2.1.9.0",
+        "changelog": "Solid primary backdrop; horizontal logo+title lockup; italic FinFamily tagline.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.9.0/explicitfin_2.1.9.0.zip",
+        "checksum": "3aa89969f385f10cead30db2fc50588e",
+        "timestamp": "2026-09-14T16:30:34Z"
+      },
+      {
         "version": "2.1.8.0",
         "changelog": "Horizontal logo+title lockup; full-opacity FinFamily tagline under title.",
         "targetAbi": "10.11.0.0",
