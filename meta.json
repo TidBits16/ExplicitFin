@@ -6,8 +6,8 @@
   "owner": "TidBits16",
   "category": "Metadata",
   "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
-  "version": "2.1.8.0",
+  "version": "2.1.9.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Horizontal logo+title lockup; full-opacity FinFamily tagline under title.",
+  "changelog": "Solid primary backdrop; horizontal logo+title lockup; italic FinFamily tagline.",
   "imagePath": "backdrop.svg"
 }

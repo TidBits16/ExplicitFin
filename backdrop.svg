@@ -1,10 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#c44a08"/>
-      <stop offset="55%" stop-color="#fe640b"/>
-      <stop offset="100%" stop-color="#179299"/>
-    </linearGradient>
     <style type="text/css"><![CDATA[
       .title {
         font-family: "Nunito", "Quicksand", "Comfortaa", "Arial Rounded MT Bold", ui-rounded, sans-serif;
@@ -16,23 +11,24 @@
       .tagline {
         font-family: "Nunito", "Quicksand", "Comfortaa", "Arial Rounded MT Bold", ui-rounded, sans-serif;
         font-weight: 700;
+        font-style: italic;
         font-size: 42px;
         fill: #ffffff;
         letter-spacing: -0.015em;
       }
     ]]></style>
   </defs>
-  <rect width="1920" height="1080" fill="url(#g)"/>
+  <rect width="1920" height="1080" fill="#fe640b"/>
   <g transform="translate(960, 540)">
-    <g transform="translate(-694.50, -190.00)">
+    <g transform="translate(-694.50, -200.00)">
       <g transform="translate(-40.00, -40.00) scale(10.0)">
-    <rect width="40" height="40" x="4" y="4" rx="4" fill="#fe640b"/>
+<rect width="40" height="40" x="4" y="4" rx="4" fill="#fe640b"/>
     <path fill="#ffffff" d="M 24 10 C 20.19 10 7.92 32.24 9.79 36 C 11.66 39.75 36.36 39.71 38.21 36 C 40.25 32.29 27.81 10 24 10 Z M 33.31 32.74 C 32.1 35.17 15.92 35.2 14.69 32.74 C 13.46 30.28 21.5 15.71 24 15.71 C 26.5 15.71 34.52 30.31 33.31 32.74 Z M 24 21.04 C 22.74 21.04 18.66 28.42 19.28 29.67 C 19.9 30.92 28.1 30.9 28.71 29.67 C 29.32 28.44 25.26 21.04 24 21.04 Z"/>
     <rect width="14" height="14" x="28" y="28" rx="2.5" fill="#179299"/>
     <path fill="#ffffff" d="M 32 31.5 C 32 31.22 32.22 31 32.5 31 H 37.5 C 37.78 31 38 31.22 38 31.5 C 38 31.78 37.78 32 37.5 32 H 33.5 V 34.25 H 37 C 37.28 34.25 37.5 34.47 37.5 34.75 C 37.5 35.03 37.28 35.25 37 35.25 H 33.5 V 37.5 H 37.5 C 37.78 37.5 38 37.72 38 38 C 38 38.28 37.78 38.5 37.5 38.5 H 32.5 C 32.22 38.5 32 38.28 32 38 Z"/>
       </g>
-      <text class="title" x="428.00" y="59.00" dominant-baseline="hanging">ExplicitFin</text>
-      <text class="tagline" x="428.00" y="278.00" dominant-baseline="hanging">A part of the FinFamily of plugins</text>
+      <text class="title" x="428.00" y="99.50" dominant-baseline="hanging">ExplicitFin</text>
+      <text class="tagline" x="445.00" y="318.50" dominant-baseline="hanging">Part of the FinFamily of plugins</text>
     </g>
   </g>
 </svg>
