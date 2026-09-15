@@ -3,15 +3,15 @@ using System.Text;
 using System.Text.Json;
 using MediaBrowser.Common.Configuration;
 
-namespace Jellyfin.Plugin.ExplicitTagger;
+namespace Jellyfin.Plugin.FinCommon;
 
-public class HttpCache
+public sealed class HttpCache
 {
     private readonly string _dir;
     private readonly object _gate = new();
 
-    public HttpCache(IApplicationPaths paths)
-        : this(Path.Combine(paths.CachePath, "explicitfin"))
+    public HttpCache(IApplicationPaths paths, string cacheFolderName)
+        : this(Path.Combine(paths.CachePath, cacheFolderName))
     {
     }
 
@@ -56,6 +56,38 @@ public class HttpCache
         lock (_gate)
         {
             File.WriteAllText(fp, payload.GetRawText());
+        }
+    }
+
+    public void SetObject(string key, object payload)
+    {
+        var fp = Path.Combine(_dir, Hash(key) + ".json");
+        lock (_gate)
+        {
+            File.WriteAllText(fp, JsonSerializer.Serialize(payload));
+        }
+    }
+
+    public void Clear()
+    {
+        lock (_gate)
+        {
+            if (!Directory.Exists(_dir))
+            {
+                return;
+            }
+
+            foreach (var file in Directory.EnumerateFiles(_dir, "*.json"))
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch
+                {
+                    // best-effort clear
+                }
+            }
         }
     }
 

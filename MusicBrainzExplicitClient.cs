@@ -18,7 +18,8 @@ public sealed class MusicBrainzExplicitClient
             cache,
             TimeSpan.FromMilliseconds(1100),
             maxInFlight: 1,
-            BuildUserAgent());
+            userAgent: BuildUserAgent(),
+            skipCacheOnErrorProperty: true);
     }
 
     public int HttpCount => _http.HttpCount;

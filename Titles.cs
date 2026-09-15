@@ -108,25 +108,17 @@ public static class Titles
         }
 
         var s = name;
-        foreach (var edge in new[] { mark, mark + " ", " " + mark })
+        if (s.StartsWith(mark, StringComparison.Ordinal))
         {
-            if (s.StartsWith(edge, StringComparison.Ordinal))
-            {
-                s = s[edge.Length..].TrimStart();
-                break;
-            }
+            s = s[mark.Length..];
         }
 
-        foreach (var edge in new[] { mark, " " + mark, mark + " " })
+        if (s.EndsWith(mark, StringComparison.Ordinal))
         {
-            if (s.EndsWith(edge, StringComparison.Ordinal))
-            {
-                s = s[..^edge.Length].TrimEnd();
-                break;
-            }
+            s = s[..^mark.Length];
         }
 
-        return s;
+        return s.Trim();
     }
 
     public static bool HasExplicitMark(string name)

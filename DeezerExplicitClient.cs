@@ -27,7 +27,12 @@ public sealed class DeezerExplicitClient
 
     public DeezerExplicitClient(IHttpClientFactory factory, HttpCache cache, ILogger<DeezerExplicitClient> logger)
     {
-        _http = new PacedHttp(factory, cache, TimeSpan.FromMilliseconds(120), maxInFlight: 4);
+        _http = new PacedHttp(
+            factory,
+            cache,
+            TimeSpan.FromMilliseconds(120),
+            maxInFlight: 4,
+            skipCacheOnErrorProperty: true);
         _logger = logger;
     }
 
