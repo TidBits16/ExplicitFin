@@ -153,7 +153,9 @@ public class ExplicitEngine
         var writes = 0;
         var pending = force
             ? albumGroup.Tracks
-            : albumGroup.Tracks.Where(t => !seen.Contains(t.Id)).ToList();
+            : albumGroup.Tracks
+                .Where(t => !seen.Contains(t.Id) && !LookupMiss.IsRemembered(_cache, TrackMissKey(t)))
+                .ToList();
 
         if (pending.Count == 0)
         {
@@ -311,6 +313,7 @@ public class ExplicitEngine
 
         if (decision is null)
         {
+            LookupMiss.Remember(_cache, TrackMissKey(track));
             return (false, false);
         }
 
@@ -766,6 +769,8 @@ public class ExplicitEngine
 
         return string.Empty;
     }
+
+    private static string TrackMissKey(Audio track) => "track/" + track.Id.ToString("N");
 
     private static string PrimaryAlbumArtist(IReadOnlyList<Audio> tracks)
     {

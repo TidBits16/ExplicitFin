@@ -104,6 +104,9 @@ public sealed class PacedHttp
 
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
+                    // Remember empty so the same URL is not re-hit until TTL expires.
+                    using var missDoc = JsonDocument.Parse("{}");
+                    _cache.Set(key, missDoc.RootElement.Clone());
                     return null;
                 }
 
