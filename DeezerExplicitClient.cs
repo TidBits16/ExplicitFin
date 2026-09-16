@@ -20,7 +20,7 @@ public sealed class DeezerAlbumMatch
 public sealed class DeezerExplicitClient
 {
     private const string Base = "https://api.deezer.com";
-    private static readonly TimeSpan Ttl = TimeSpan.FromDays(7);
+    private static readonly TimeSpan Ttl = TimeSpan.FromDays(30);
 
     private readonly PacedHttp _http;
     private readonly ILogger<DeezerExplicitClient> _logger;

@@ -34,6 +34,15 @@ public sealed class HttpCache
 
             if (ttl > TimeSpan.Zero && DateTime.UtcNow - File.GetLastWriteTimeUtc(fp) > ttl)
             {
+                try
+                {
+                    File.Delete(fp);
+                }
+                catch
+                {
+                    // best-effort; treat as miss either way
+                }
+
                 return false;
             }
 

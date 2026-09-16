@@ -6,7 +6,7 @@ public sealed class MusicBrainzExplicitClient
 {
     private const string Base = "https://musicbrainz.org/ws/2";
     private const int MaxDetailLookups = 5;
-    private static readonly TimeSpan Ttl = TimeSpan.FromDays(7);
+    private static readonly TimeSpan Ttl = TimeSpan.FromDays(30);
     private static readonly string[] ExplicitTags = ["explicit", "[explicit]", "nsfw", "not safe for work"];
 
     private readonly PacedHttp _http;

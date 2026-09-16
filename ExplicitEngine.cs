@@ -16,6 +16,7 @@ public class ExplicitEngine
     private readonly DeezerExplicitClient _deezer;
     private readonly MusicBrainzExplicitClient _musicBrainz;
     private readonly IApplicationPaths _paths;
+    private readonly HttpCache _cache;
     private readonly ILogger<ExplicitEngine> _logger;
     private int _forceNext;
 
@@ -24,12 +25,14 @@ public class ExplicitEngine
         DeezerExplicitClient deezer,
         MusicBrainzExplicitClient musicBrainz,
         IApplicationPaths paths,
+        HttpCache cache,
         ILogger<ExplicitEngine> logger)
     {
         _library = library;
         _deezer = deezer;
         _musicBrainz = musicBrainz;
         _paths = paths;
+        _cache = cache;
         _logger = logger;
     }
 
@@ -44,6 +47,12 @@ public class ExplicitEngine
 
     public async Task RunAsync(bool force, IProgress<double> progress, CancellationToken cancellationToken)
     {
+        if (force)
+        {
+            _cache.Clear();
+            _logger.LogInformation("ExplicitFin: force scan requested (HTTP cache cleared)");
+        }
+
         var cfg = Plugin.Instance?.Configuration ?? new PluginConfiguration();
         var workers = cfg.Workers <= 0 ? Environment.ProcessorCount : cfg.Workers;
         workers = Math.Clamp(workers, 1, Math.Max(1, Environment.ProcessorCount));

@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
     "versions": [
       {
+        "version": "2.1.11.0",
+        "changelog": "HTTP caches last 30 days; force scan clears cache; expired lookups re-fetch individually.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.11.0/explicitfin_2.1.11.0.zip",
+        "checksum": "a0c6978fa752cf4e567a99fafa1e18b9",
+        "timestamp": "2026-09-16T15:07:35Z"
+      },
+      {
         "version": "2.1.10.0",
         "changelog": "Shared FinCommon HTTP cache/client; simplify title marker stripping.",
         "targetAbi": "10.11.0.0",
