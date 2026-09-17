@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
     "versions": [
       {
+        "version": "2.1.14.0",
+        "changelog": "Simultaneous-run safety: preserve explicit marks on album renames, album re-mark when tracks seen, shared Deezer/MusicBrainz pace, staggered Sunday defaults.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.14.0/explicitfin_2.1.14.0.zip",
+        "checksum": "c1fd0334e02cf06a885a982100f88b72",
+        "timestamp": "2026-09-17T15:05:28Z"
+      },
+      {
         "version": "2.1.13.0",
         "changelog": "Settings page polish: clearer helpers, grouped toggles, styled Advanced / force-refresh sections.",
         "targetAbi": "10.11.0.0",
