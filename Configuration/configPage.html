@@ -3,29 +3,70 @@
 <head>
     <meta charset="utf-8" />
     <title>ExplicitFin: Mark Your Songs</title>
+    <style>
+        .finConfig .finIntro { margin: 0.25em 0 1.5em; opacity: 0.75; }
+        .finConfig .verticalSection { margin-top: 1.75em; }
+        .finConfig .finSectionLabel { margin-bottom: 0.35em; }
+        .finConfig .finSectionHelp { margin: 0 0 0.75em; }
+        .finConfig .finToggleList { margin-top: 0.5em; padding: 0.35em 0.75em; }
+        .finConfig .finToggleList .checkboxContainer { margin: 0.55em 0; }
+        .finConfig details.finAdvanced {
+            margin-top: 1.75em;
+            padding: 0.35em 0;
+        }
+        .finConfig details.finAdvanced > summary {
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+            padding: 0.4em 0;
+        }
+        .finConfig details.finAdvanced > summary::-webkit-details-marker { display: none; }
+        .finConfig details.finAdvanced > summary::before {
+            content: "▸";
+            display: inline-block;
+            width: 1em;
+            margin-right: 0.25em;
+            opacity: 0.7;
+        }
+        .finConfig details.finAdvanced[open] > summary::before { content: "▾"; }
+        .finConfig .finAdvancedBody { margin-top: 0.85em; }
+        .finConfig .finDangerZone {
+            margin-top: 1.5em;
+            padding-top: 1.1em;
+            border-top: 1px solid rgba(128, 128, 128, 0.3);
+        }
+        .finConfig .finDangerZone .finSectionLabel { opacity: 0.9; }
+        .finConfig .finStatus {
+            margin-top: 0.5em;
+            min-height: 1.2em;
+            font-style: italic;
+            opacity: 0.8;
+        }
+        .finConfig .finSaveRow { margin-top: 2em; padding-top: 0.5em; }
+    </style>
 </head>
 <body>
-    <div id="EfConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox,emby-select,paper-icon-button-light">
+    <div id="EfConfigPage" data-role="page" class="page type-interior pluginConfigurationPage finConfig" data-require="emby-input,emby-button,emby-checkbox,emby-select,paper-icon-button-light">
         <div data-role="content">
             <div class="content-primary">
                 <form id="EfConfigForm">
                     <div class="sectionTitleContainer flex align-items-center">
                         <h2 class="sectionTitle">ExplicitFin: Mark Your Songs</h2>
                     </div>
-                    <p>Adds explicit symbols to track titles, and optionally albums. Scheduled scans only touch tracks they have not decided yet.</p>
+                    <p class="fieldDescription finIntro">Adds explicit symbols to track titles, and optionally albums. Scheduled scans only touch tracks they have not decided yet.</p>
 
                     <div class="verticalSection">
-                        <h3 class="checkboxListLabel">Metadata providers</h3>
-                        <div class="fieldDescription">Providers are checked in order. For consistency, its recommended to leave Deezer first.</div>
+                        <h3 class="checkboxListLabel finSectionLabel">Metadata providers</h3>
+                        <div class="fieldDescription finSectionHelp">Tried in order. Deezer first is recommended.</div>
                         <div id="ProviderList" class="checkboxList paperList checkboxList-paperList"></div>
                     </div>
 
                     <div class="verticalSection">
-                        <h3 class="checkboxListLabel">Explicit Symbol</h3>
+                        <h3 class="checkboxListLabel finSectionLabel">Explicit Symbol</h3>
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="ExplicitMark">Symbol</label>
                             <input is="emby-input" type="text" id="ExplicitMark" />
-                            <div class="fieldDescription">e.g. 🅴 or [Explicit]. A space is not required.</div>
+                            <div class="fieldDescription">Text or emoji added to explicit titles.</div>
                         </div>
                         <div class="selectContainer">
                             <label class="selectLabel" for="ExplicitMarkPlacement">Placement</label>
@@ -33,53 +74,61 @@
                                 <option value="append">After the title</option>
                                 <option value="prepend">Before the title</option>
                             </select>
+                            <div class="fieldDescription">Where the symbol goes on the title.</div>
                         </div>
-                        <div class="checkboxContainer checkboxContainer-withDescription">
-                            <label>
-                                <input is="emby-checkbox" type="checkbox" id="KeepExistingMarks" />
-                                <span>Keep existing marks</span>
-                            </label>
-                            <div class="fieldDescription checkboxDescription">
-                                Keeps hand-added symbols/tags even if catalogs say clean.
+                        <div class="checkboxList paperList checkboxList-paperList finToggleList">
+                            <div class="checkboxContainer checkboxContainer-withDescription">
+                                <label>
+                                    <input is="emby-checkbox" type="checkbox" id="KeepExistingMarks" />
+                                    <span>Keep existing marks</span>
+                                </label>
+                                <div class="fieldDescription checkboxDescription">
+                                    Don't remove symbols you added by hand.
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="verticalSection">
-                        <h3 class="checkboxListLabel">Jellyfin tags</h3>
-                        <div class="checkboxContainer">
-                            <label>
-                                <input is="emby-checkbox" type="checkbox" id="WriteExplicitTags" />
-                                <span>Add tags to explicit tracks</span>
-                            </label>
-                        </div>
-                        <div class="inputContainer" id="ExplicitTagsRow">
-                            <label class="inputLabel inputLabelUnfocused" for="ExplicitTags">Tags</label>
-                            <input is="emby-input" type="text" id="ExplicitTags" />
-                            <div class="fieldDescription">Comma-separated.</div>
-                        </div>
-                        <div class="checkboxContainer checkboxContainer-withDescription">
-                            <label>
-                                <input is="emby-checkbox" type="checkbox" id="MarkAlbums" />
-                                <span>Also mark albums</span>
-                            </label>
-                            <div class="fieldDescription checkboxDescription">
-                                Mark albums when Deezer flags them, or enough tracks already have the symbol.
+                        <h3 class="checkboxListLabel finSectionLabel">Jellyfin tags</h3>
+                        <div class="checkboxList paperList checkboxList-paperList finToggleList">
+                            <div class="checkboxContainer checkboxContainer-withDescription">
+                                <label>
+                                    <input is="emby-checkbox" type="checkbox" id="WriteExplicitTags" />
+                                    <span>Add tags to explicit tracks</span>
+                                </label>
+                                <div class="fieldDescription checkboxDescription">
+                                    Also apply Jellyfin tags on explicit tracks.
+                                </div>
                             </div>
-                        </div>
-                        <div class="inputContainer" id="AlbumThresholdRow">
-                            <label class="inputLabel inputLabelUnfocused" for="AlbumMinExplicitTracks">Minimum explicit tracks</label>
-                            <input is="emby-input" type="number" id="AlbumMinExplicitTracks" min="1" step="1" />
-                            <div class="fieldDescription">Fallback when Deezer does not flag the album. 1 = any marked track.</div>
+                            <div class="inputContainer" id="ExplicitTagsRow">
+                                <label class="inputLabel inputLabelUnfocused" for="ExplicitTags">Tags</label>
+                                <input is="emby-input" type="text" id="ExplicitTags" />
+                                <div class="fieldDescription">Tag names to apply.</div>
+                            </div>
+                            <div class="checkboxContainer checkboxContainer-withDescription">
+                                <label>
+                                    <input is="emby-checkbox" type="checkbox" id="MarkAlbums" />
+                                    <span>Also mark albums</span>
+                                </label>
+                                <div class="fieldDescription checkboxDescription">
+                                    Add the symbol to album titles when enough tracks are explicit.
+                                </div>
+                            </div>
+                            <div class="inputContainer" id="AlbumThresholdRow">
+                                <label class="inputLabel inputLabelUnfocused" for="AlbumMinExplicitTracks">Minimum explicit tracks</label>
+                                <input is="emby-input" type="number" id="AlbumMinExplicitTracks" min="1" step="1" />
+                                <div class="fieldDescription">How many marked tracks are needed before marking the album.</div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="verticalSection">
-                        <h3 class="checkboxListLabel">Matching</h3>
+                        <h3 class="checkboxListLabel finSectionLabel">Matching</h3>
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="MinTitleSimilarity">Min title similarity</label>
                             <input is="emby-input" type="number" id="MinTitleSimilarity" min="0.5" max="1" step="0.01" />
-                            <div class="fieldDescription">How similar a track title must be to be considered in %. 0.9 recommended.</div>
+                            <div class="fieldDescription">How closely titles must match. Higher is stricter.</div>
                         </div>
                         <div class="selectContainer">
                             <label class="selectLabel" for="DualVersionPreference">If both explicit and clean matches are found</label>
@@ -88,45 +137,50 @@
                                 <option value="prefer_clean">Prefer clean</option>
                                 <option value="dont_touch">Don't touch</option>
                             </select>
+                            <div class="fieldDescription">When both clean and explicit catalog versions match.</div>
                         </div>
                     </div>
 
-                    <details class="verticalSection">
-                        <summary class="checkboxListLabel" style="cursor:pointer">Advanced</summary>
-                        <div class="inputContainer" style="margin-top:1em">
-                            <label class="inputLabel" for="Workers">Workers</label>
-                            <input is="emby-input" type="number" id="Workers" min="0" />
-                            <div class="fieldDescription">Concurrency across albums. 0 = auto (CPU count).</div>
-                        </div>
-                        <div class="verticalSection" style="margin-top:1.5em">
-                            <h3 class="checkboxListLabel">Force refresh</h3>
-                            <button is="emby-button" type="button" id="ScanAllBtn" class="raised block button-delete">
-                                <span>Force Re-check Every Track</span>
-                            </button>
-                            <div class="fieldDescription" style="margin-top:0.5em">
-                                Overwrites existing marks! Don't use unless you know what you're doing!
-                            </div>
-                            <div class="fieldDescription" id="ScanAllStatus" style="margin-top:0.5em"></div>
-                        </div>
-                        <div class="verticalSection" style="margin-top:1.5em">
-                            <h3 class="checkboxListLabel">Remove symbol</h3>
+                    <details class="verticalSection finAdvanced">
+                        <summary class="checkboxListLabel">Advanced</summary>
+                        <div class="finAdvancedBody">
                             <div class="inputContainer">
-                                <input is="emby-input" type="text" id="RemoveSymbol" aria-label="Remove symbol" />
-                                <div class="fieldDescription">Removes this symbol from track and album titles.</div>
+                                <label class="inputLabel" for="Workers">Workers</label>
+                                <input is="emby-input" type="number" id="Workers" min="0" />
+                                <div class="fieldDescription">How many albums to process at once.</div>
                             </div>
-                            <button is="emby-button" type="button" id="RemoveSymbolBtn" class="raised block button-delete">
-                                <span>Force Remove Symbol</span>
-                            </button>
-                            <div class="fieldDescription" style="margin-top:0.5em">
-                                Removes existing marks! Don't use unless you know what you're doing!
+                            <div class="finDangerZone">
+                                <h3 class="checkboxListLabel finSectionLabel">Force refresh</h3>
+                                <button is="emby-button" type="button" id="ScanAllBtn" class="raised block button-delete">
+                                    <span>Force Re-check Every Track</span>
+                                </button>
+                                <div class="fieldDescription" style="margin-top:0.5em">
+                                    Re-checks every track and may overwrite marks.
+                                </div>
+                                <div class="fieldDescription finStatus" id="ScanAllStatus"></div>
                             </div>
-                            <div class="fieldDescription" id="RemoveSymbolStatus" style="margin-top:0.5em"></div>
+                            <div class="finDangerZone">
+                                <h3 class="checkboxListLabel finSectionLabel">Remove symbol</h3>
+                                <div class="inputContainer">
+                                    <input is="emby-input" type="text" id="RemoveSymbol" aria-label="Remove symbol" />
+                                    <div class="fieldDescription">Symbol to strip from titles.</div>
+                                </div>
+                                <button is="emby-button" type="button" id="RemoveSymbolBtn" class="raised block button-delete">
+                                    <span>Force Remove Symbol</span>
+                                </button>
+                                <div class="fieldDescription" style="margin-top:0.5em">
+                                    Removes that symbol from titles across the library.
+                                </div>
+                                <div class="fieldDescription finStatus" id="RemoveSymbolStatus"></div>
+                            </div>
                         </div>
                     </details>
 
-                    <button is="emby-button" type="submit" class="raised button-submit block">
-                        <span>Save</span>
-                    </button>
+                    <div class="finSaveRow">
+                        <button is="emby-button" type="submit" class="raised button-submit block">
+                            <span>Save</span>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
