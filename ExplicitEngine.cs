@@ -157,6 +157,7 @@ public class ExplicitEngine
                 .Where(t => !seen.Contains(t.Id) && !LookupMiss.IsRemembered(_cache, TrackMissKey(t)))
                 .ToList();
 
+        // Tracks already decided — still allow album mark pass so MusicFin renames get marks restored.
         if (pending.Count == 0)
         {
             foreach (var _ in albumGroup.Tracks)
@@ -164,7 +165,34 @@ public class ExplicitEngine
                 onTrackDone();
             }
 
-            return 0;
+            if (!cfg.MarkAlbums)
+            {
+                return 0;
+            }
+
+            try
+            {
+                if (await ProcessAlbumItemAsync(
+                        albumGroup,
+                        cfg,
+                        force,
+                        deezerAlbumExplicit: null,
+                        changeLogPath,
+                        cancellationToken).ConfigureAwait(false))
+                {
+                    writes++;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "ExplicitFin failed marking album {Album}", albumGroup.AlbumName);
+            }
+
+            return writes;
         }
 
         var albumName = albumGroup.AlbumName;

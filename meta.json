@@ -6,8 +6,8 @@
   "owner": "TidBits16",
   "category": "Metadata",
   "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
-  "version": "2.1.13.0",
+  "version": "2.1.14.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Settings page polish: clearer helpers, grouped toggles, styled Advanced / force-refresh sections.",
+  "changelog": "Simultaneous-run safety: preserve explicit marks on album renames, album re-mark when tracks seen, shared Deezer/MusicBrainz pace, staggered Sunday defaults.",
   "imagePath": "backdrop.svg"
 }

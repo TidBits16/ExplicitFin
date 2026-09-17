@@ -90,7 +90,15 @@ public sealed class PacedHttp
         {
             for (var attempt = 0; attempt < attempts; attempt++)
             {
-                await PaceAsync(cancellationToken).ConfigureAwait(false);
+                if (SharedHostGate.IsSharedHost(url))
+                {
+                    await SharedHostGate.WaitAsync(url, _minDelay, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    await PaceAsync(cancellationToken).ConfigureAwait(false);
+                }
+
                 using var response = await _http.GetAsync(url, cancellationToken).ConfigureAwait(false);
                 Interlocked.Increment(ref _httpN);
 

@@ -50,8 +50,9 @@ public class ExplicitLibraryTask : IScheduledTask
         [
             new TaskTriggerInfo
             {
-                Type = TaskTriggerInfoType.DailyTrigger,
-                TimeOfDayTicks = TimeSpan.FromHours(2).Ticks
+                Type = TaskTriggerInfoType.WeeklyTrigger,
+                DayOfWeek = DayOfWeek.Sunday,
+                TimeOfDayTicks = TimeSpan.FromHours(3).Ticks
             }
         ];
     }
