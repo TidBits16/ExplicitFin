@@ -5,6 +5,8 @@
 
 # ExplicitTagShelf: Mark Your Songs
 
+> <strong>LLM disclosure:</strong> This plugin is <strong>primarily developed with LLM assistance</strong> (Cursor / coding agents). Review and test before relying on it in production.
+
 > Formerly <strong>ExplicitFin</strong>. Same plugin GUID — settings carry over when you update.
 
 Don't you hate when your blasting your favorite song on your stereo just to remember "oh yeah, this song has a bunch of obscenities"...
