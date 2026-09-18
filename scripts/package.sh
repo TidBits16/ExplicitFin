@@ -1,56 +1,79 @@
 #!/usr/bin/env bash
+# Canonical: TagShelfCommon/scripts/package.sh
+# Vendored into each plugin by sync-into-plugins.sh. Edit here, then sync. Do not edit copies.
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
+plugin="$(basename "$root")"
+csproj="Jellyfin.Plugin.${plugin}.csproj"
+if [[ ! -f "$csproj" ]]; then
+  echo "package.sh: expected ${csproj} in ${root}" >&2
+  exit 1
+fi
 
-version="$(python3 - <<'PY'
-import re
+eval "$(python3 - "$csproj" <<'PY'
+import re, shlex, sys
 from pathlib import Path
-text = Path("Jellyfin.Plugin.ExplicitTagShelf.csproj").read_text()
-raw = re.search(r"<Version>([^<]+)</Version>", text).group(1).strip()
+
+text = Path(sys.argv[1]).read_text()
+
+def tag(name, default=""):
+    match = re.search(rf"<{name}>([^<]+)</{name}>", text)
+    return match.group(1).strip() if match else default
+
+raw = tag("Version")
+if not raw:
+    raise SystemExit("package.sh: missing <Version> in csproj")
 parts = [p for p in raw.split(".") if p != ""]
 while len(parts) < 4:
     parts.append("0")
-print(".".join(parts[:4]))
+print(f"version={shlex.quote('.'.join(parts[:4]))}")
+print(f"tfm={shlex.quote(tag('TargetFramework', 'net9.0'))}")
+print(f"assembly={shlex.quote(tag('AssemblyName', Path(sys.argv[1]).stem))}")
 PY
 )"
 
+owner="TidBits16"
+if origin="$(git remote get-url origin 2>/dev/null || true)"; then
+  if [[ "$origin" =~ github.com[:/]([^/]+)/ ]]; then
+    owner="${BASH_REMATCH[1]}"
+  fi
+fi
+
 export PATH="${HOME}/.dotnet:${PATH}"
-dotnet build -c Release --nologo
+dotnet build "$csproj" -c Release --nologo
+
+dll="bin/Release/${tfm}/${assembly}.dll"
+if [[ ! -f "$dll" ]]; then
+  echo "package.sh: missing ${dll}" >&2
+  exit 1
+fi
 
 stage="$(mktemp -d)"
 trap 'rm -rf "$stage"' EXIT
-cp "bin/Release/net9.0/Jellyfin.Plugin.ExplicitTagShelf.dll" "$stage/"
+cp "$dll" "$stage/${assembly}.dll"
 cp meta.json "$stage/"
 cp backdrop.svg "$stage/"
 
 mkdir -p dist
-zip_path="$root/dist/ExplicitTagShelf_${version}.zip"
+zip_path="$root/dist/${plugin}_${version}.zip"
 rm -f "$zip_path"
-python3 - "$stage" "$zip_path" <<'PY'
-import sys, zipfile
-from pathlib import Path
-stage, zip_path = sys.argv[1], sys.argv[2]
-with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-    for name in ("Jellyfin.Plugin.ExplicitTagShelf.dll", "meta.json", "backdrop.svg"):
-        zf.write(Path(stage) / name, name)
-PY
-
-checksum="$(python3 - "$zip_path" <<'PY'
-import hashlib, sys
-from pathlib import Path
-print(hashlib.md5(Path(sys.argv[1]).read_bytes()).hexdigest())
-PY
-)"
+source_url="https://github.com/${owner}/${plugin}/releases/download/v${version}/${plugin}_${version}.zip"
 timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-source_url="https://github.com/TidBits16/ExplicitTagShelf/releases/download/v${version}/ExplicitTagShelf_${version}.zip"
 
-python3 - "$version" "$checksum" "$timestamp" "$source_url" <<'PY'
-import json, sys
+python3 - "$stage" "$zip_path" "$assembly" "$version" "$timestamp" "$source_url" <<'PY'
+import hashlib, json, sys, zipfile
 from pathlib import Path
 
-version, checksum, timestamp, source_url = sys.argv[1:]
+stage, zip_path, assembly, version, timestamp, source_url = sys.argv[1:]
+dll_name = f"{assembly}.dll"
+names = (dll_name, "meta.json", "backdrop.svg")
+with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+    for name in names:
+        zf.write(Path(stage) / name, name)
+
+checksum = hashlib.md5(Path(zip_path).read_bytes()).hexdigest()
 meta = json.loads(Path("meta.json").read_text())
 entry = {
     "guid": meta["guid"],
@@ -86,7 +109,7 @@ entry["overview"] = meta["overview"]
 entry["owner"] = meta["owner"]
 entry["category"] = meta["category"]
 entry["imageUrl"] = meta.get("imageUrl") or ""
-Path("manifest.json").write_text(json.dumps([entry], indent=2) + "\n")
+manifest_path.write_text(json.dumps([entry], indent=2) + "\n")
 print(f"zip {source_url}")
 print(f"md5 {checksum}")
 PY
