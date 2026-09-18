@@ -3,22 +3,70 @@ using System.Text;
 using System.Text.Json;
 using MediaBrowser.Common.Configuration;
 
-namespace Jellyfin.Plugin.FinCommon;
+namespace Jellyfin.Plugin.TagShelfCommon;
 
 public sealed class HttpCache
 {
     private readonly string _dir;
     private readonly object _gate = new();
 
-    public HttpCache(IApplicationPaths paths, string cacheFolderName)
+    public HttpCache(IApplicationPaths paths, string cacheFolderName, string? legacyCacheFolderName = null)
         : this(Path.Combine(paths.CachePath, cacheFolderName))
     {
+        if (!string.IsNullOrEmpty(legacyCacheFolderName))
+        {
+            TryMigrateLegacyCache(Path.Combine(paths.CachePath, legacyCacheFolderName), _dir);
+        }
     }
 
     public HttpCache(string cacheDirectory)
     {
         _dir = cacheDirectory;
         Directory.CreateDirectory(_dir);
+    }
+
+    private static void TryMigrateLegacyCache(string legacyDir, string newDir)
+    {
+        try
+        {
+            if (!Directory.Exists(legacyDir))
+            {
+                return;
+            }
+
+            Directory.CreateDirectory(newDir);
+            if (Directory.EnumerateFileSystemEntries(newDir).Any())
+            {
+                return;
+            }
+
+            foreach (var entry in Directory.EnumerateFileSystemEntries(legacyDir))
+            {
+                var name = Path.GetFileName(entry);
+                var dest = Path.Combine(newDir, name);
+                if (Directory.Exists(entry))
+                {
+                    Directory.Move(entry, dest);
+                }
+                else
+                {
+                    File.Move(entry, dest);
+                }
+            }
+
+            try
+            {
+                Directory.Delete(legacyDir, recursive: false);
+            }
+            catch
+            {
+                // Leave empty legacy dir if not removable.
+            }
+        }
+        catch
+        {
+            // Best-effort; cold cache is fine.
+        }
     }
 
     public bool TryGet(string key, TimeSpan ttl, out JsonElement element)

@@ -1,4 +1,4 @@
-namespace Jellyfin.Plugin.FinCommon;
+namespace Jellyfin.Plugin.TagShelfCommon;
 
 /// <summary>
 /// Remembers failed lookups (unknown artist/track) so scheduled runs skip them until TTL.

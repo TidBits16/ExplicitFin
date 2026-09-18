@@ -1,6 +1,6 @@
 using MediaBrowser.Model.Plugins;
 
-namespace Jellyfin.Plugin.ExplicitTagger.Configuration;
+namespace Jellyfin.Plugin.ExplicitTagShelf.Configuration;
 
 public class PluginConfiguration : BasePluginConfiguration
 {

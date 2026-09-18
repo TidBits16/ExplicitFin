@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.ExplicitTagger;
+namespace Jellyfin.Plugin.ExplicitTagShelf;
 
 public class ExplicitLibraryTask : IScheduledTask
 {
@@ -18,9 +18,9 @@ public class ExplicitLibraryTask : IScheduledTask
         _logger = logger;
     }
 
-    public string Name => "- ExplicitFin: Mark Your Songs";
+    public string Name => "- ExplicitTagShelf: Mark Your Songs";
 
-    public string Key => "ExplicitFinLibrary";
+    public string Key => "ExplicitTagShelfLibrary";
 
     public string Description =>
         "Scheduled scans only mark tracks not decided yet. Force-refresh from plugin settings overwrites from catalogs.";
@@ -39,7 +39,7 @@ public class ExplicitLibraryTask : IScheduledTask
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "ExplicitFin failed");
+            _logger.LogError(ex, "ExplicitTagShelf failed");
             throw;
         }
     }

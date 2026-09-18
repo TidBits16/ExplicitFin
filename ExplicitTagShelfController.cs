@@ -6,18 +6,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Jellyfin.Plugin.ExplicitTagger;
+namespace Jellyfin.Plugin.ExplicitTagShelf;
 
 [Authorize(Policy = Policies.RequiresElevation)]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
-[Route("ExplicitFin")]
-public sealed class ExplicitFinController : ControllerBase
+[Route("ExplicitTagShelf")]
+public sealed class ExplicitTagShelfController : ControllerBase
 {
     private readonly ExplicitEngine _engine;
     private readonly ITaskManager _tasks;
 
-    public ExplicitFinController(ExplicitEngine engine, ITaskManager tasks)
+    public ExplicitTagShelfController(ExplicitEngine engine, ITaskManager tasks)
     {
         _engine = engine;
         _tasks = tasks;

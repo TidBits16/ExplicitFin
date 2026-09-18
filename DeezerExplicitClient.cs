@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.ExplicitTagger;
+namespace Jellyfin.Plugin.ExplicitTagShelf;
 
 public sealed class DeezerAlbumTrack
 {

@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
 
-namespace Jellyfin.Plugin.ExplicitTagger;
+namespace Jellyfin.Plugin.ExplicitTagShelf;
 
-/// <summary>GUIDs ExplicitFin has already decided, so scheduled runs can skip them.</summary>
+/// <summary>GUIDs ExplicitTagShelf has already decided, so scheduled runs can skip them.</summary>
 internal sealed class SeenStore
 {
     private readonly string _path;

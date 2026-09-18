@@ -1,11 +1,11 @@
 using System.Globalization;
-using Jellyfin.Plugin.ExplicitTagger.Configuration;
+using Jellyfin.Plugin.ExplicitTagShelf.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 
-namespace Jellyfin.Plugin.ExplicitTagger;
+namespace Jellyfin.Plugin.ExplicitTagShelf;
 
 public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
@@ -19,7 +19,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     public static Plugin? Instance { get; private set; }
 
-    public override string Name => "ExplicitFin: Mark Your Songs";
+    public override string Name => "ExplicitTagShelf: Mark Your Songs";
 
     public override string Description =>
         "Adds explicit symbols to track and album titles.";

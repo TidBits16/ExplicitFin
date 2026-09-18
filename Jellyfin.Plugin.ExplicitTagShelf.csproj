@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <RootNamespace>Jellyfin.Plugin.ExplicitTagger</RootNamespace>
-    <AssemblyName>Jellyfin.Plugin.ExplicitTagger</AssemblyName>
+    <RootNamespace>Jellyfin.Plugin.ExplicitTagShelf</RootNamespace>
+    <AssemblyName>Jellyfin.Plugin.ExplicitTagShelf</AssemblyName>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>2.1.14.0</Version>
-    <FileVersion>2.1.14.0</FileVersion>
-    <AssemblyVersion>2.1.14.0</AssemblyVersion>
+    <Version>2.2.0.0</Version>
+    <FileVersion>2.2.0.0</FileVersion>
+    <AssemblyVersion>2.2.0.0</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

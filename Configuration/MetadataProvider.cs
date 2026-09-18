@@ -1,4 +1,4 @@
-namespace Jellyfin.Plugin.ExplicitTagger.Configuration;
+namespace Jellyfin.Plugin.ExplicitTagShelf.Configuration;
 
 public enum MetadataProvider
 {

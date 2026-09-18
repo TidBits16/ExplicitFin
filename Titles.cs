@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Jellyfin.Plugin.ExplicitTagger;
+namespace Jellyfin.Plugin.ExplicitTagShelf;
 
 public static class Titles
 {

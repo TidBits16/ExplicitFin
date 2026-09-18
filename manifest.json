@@ -1,18 +1,26 @@
 [
   {
     "guid": "f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f",
-    "name": "ExplicitFin: Mark Your Songs",
-    "description": "Adds explicit symbols to track and album titles.",
+    "name": "ExplicitTagShelf: Mark Your Songs",
+    "description": "Adds explicit symbols to track titles.",
     "overview": "Adds explicit symbols to track titles.",
     "owner": "TidBits16",
     "category": "Metadata",
-    "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
+    "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitTagShelf/main/backdrop.svg",
     "versions": [
+      {
+        "version": "2.2.0.0",
+        "changelog": "Rebrand from ExplicitFin to ExplicitTagShelf; new TagShelf logo; migrate HTTP cache folder.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.2.0.0/ExplicitTagShelf_2.2.0.0.zip",
+        "checksum": "7fd93762972482bc5badc182c85cd58a",
+        "timestamp": "2026-09-18T16:05:39Z"
+      },
       {
         "version": "2.1.14.0",
         "changelog": "Simultaneous-run safety: preserve explicit marks on album renames, album re-mark when tracks seen, shared Deezer/MusicBrainz pace, staggered Sunday defaults.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.14.0/explicitfin_2.1.14.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.14.0/explicitfin_2.1.14.0.zip",
         "checksum": "c1fd0334e02cf06a885a982100f88b72",
         "timestamp": "2026-09-17T15:05:28Z"
       },
@@ -20,7 +28,7 @@
         "version": "2.1.13.0",
         "changelog": "Settings page polish: clearer helpers, grouped toggles, styled Advanced / force-refresh sections.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.13.0/explicitfin_2.1.13.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.13.0/explicitfin_2.1.13.0.zip",
         "checksum": "a51dc9ffe33697e94ed4a361eba4989a",
         "timestamp": "2026-09-17T13:33:13Z"
       },
@@ -28,7 +36,7 @@
         "version": "2.1.12.0",
         "changelog": "Skip undecided explicit lookups until cache TTL; cache HTTP 404s.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.12.0/explicitfin_2.1.12.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.12.0/explicitfin_2.1.12.0.zip",
         "checksum": "6c6de760fe7a87875b37b1709c34ac33",
         "timestamp": "2026-09-16T15:27:25Z"
       },
@@ -36,55 +44,55 @@
         "version": "2.1.11.0",
         "changelog": "HTTP caches last 30 days; force scan clears cache; expired lookups re-fetch individually.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.11.0/explicitfin_2.1.11.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.11.0/explicitfin_2.1.11.0.zip",
         "checksum": "a0c6978fa752cf4e567a99fafa1e18b9",
         "timestamp": "2026-09-16T15:07:35Z"
       },
       {
         "version": "2.1.10.0",
-        "changelog": "Shared FinCommon HTTP cache/client; simplify title marker stripping.",
+        "changelog": "Shared TagShelfCommon HTTP cache/client; simplify title marker stripping.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.10.0/explicitfin_2.1.10.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.10.0/explicitfin_2.1.10.0.zip",
         "checksum": "c76e4aede7ba5f0e0ab5287a9bfe7d86",
         "timestamp": "2026-09-15T14:30:23Z"
       },
       {
         "version": "2.1.9.0",
-        "changelog": "Solid primary backdrop; horizontal logo+title lockup; italic FinFamily tagline.",
+        "changelog": "Solid primary backdrop; horizontal logo+title lockup; italic TagShelf tagline.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.9.0/explicitfin_2.1.9.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.9.0/explicitfin_2.1.9.0.zip",
         "checksum": "3aa89969f385f10cead30db2fc50588e",
         "timestamp": "2026-09-14T16:30:34Z"
       },
       {
         "version": "2.1.8.0",
-        "changelog": "Horizontal logo+title lockup; full-opacity FinFamily tagline under title.",
+        "changelog": "Horizontal logo+title lockup; full-opacity TagShelf tagline under title.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.8.0/explicitfin_2.1.8.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.8.0/explicitfin_2.1.8.0.zip",
         "checksum": "d6c499175434b15d30bbb27fc8dc8cce",
         "timestamp": "2026-09-14T16:24:41Z"
       },
       {
         "version": "2.1.7.0",
-        "changelog": "Move FinFamily tagline below title on backdrop.",
+        "changelog": "Move TagShelf tagline below title on backdrop.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.7.0/explicitfin_2.1.7.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.7.0/explicitfin_2.1.7.0.zip",
         "checksum": "11899370de05ae86539c31c7191499f1",
         "timestamp": "2026-09-14T16:22:35Z"
       },
       {
         "version": "2.1.6.0",
-        "changelog": "Add FinFamily tagline under logo on backdrop.",
+        "changelog": "Add TagShelf tagline under logo on backdrop.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.6.0/explicitfin_2.1.6.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.6.0/explicitfin_2.1.6.0.zip",
         "checksum": "b0deca7160e243d837608ca20cc00674",
         "timestamp": "2026-09-14T16:14:50Z"
       },
       {
         "version": "2.1.5.0",
-        "changelog": "Center logo + title on backdrop; fix ExplicitFin cutoff.",
+        "changelog": "Center logo + title on backdrop; fix ExplicitTagShelf cutoff.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.5.0/explicitfin_2.1.5.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.5.0/explicitfin_2.1.5.0.zip",
         "checksum": "0c7f1c23a842dc1c42353cfcf7b930e2",
         "timestamp": "2026-09-14T16:12:51Z"
       },
@@ -92,7 +100,7 @@
         "version": "2.1.4.0",
         "changelog": "Keep - prefix on scheduled task only (plugin catalog name unchanged).",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.4.0/explicitfin_2.1.4.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.4.0/explicitfin_2.1.4.0.zip",
         "checksum": "ddf7470995f3bb8ee163e2d1c7acb1f5",
         "timestamp": "2026-09-14T15:42:30Z"
       },
@@ -100,7 +108,7 @@
         "version": "2.1.3.0",
         "changelog": "Sort plugin/task name to the bottom with a - prefix.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.3.0/explicitfin_2.1.3.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.3.0/explicitfin_2.1.3.0.zip",
         "checksum": "acdacc510995e2f83dca32d024506e82",
         "timestamp": "2026-09-14T15:24:53Z"
       },
@@ -108,7 +116,7 @@
         "version": "2.1.2.0",
         "changelog": "Clearer force-button labels, red destructive actions, and shorter help text.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.2.0/explicitfin_2.1.2.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.2.0/explicitfin_2.1.2.0.zip",
         "checksum": "32c4dfa01e469ce85474553fcc7bb966",
         "timestamp": "2026-09-03T01:55:53Z"
       },
@@ -116,7 +124,7 @@
         "version": "2.1.1.0",
         "changelog": "Default schedule: daily at 2:00 AM.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.1.0/explicitfin_2.1.1.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.1.0/explicitfin_2.1.1.0.zip",
         "checksum": "33ff7cfbdcac5b701408a756e6a332ad",
         "timestamp": "2026-09-03T01:39:08Z"
       },
@@ -124,7 +132,7 @@
         "version": "2.1.0.0",
         "changelog": "Mark albums from Deezer or a track threshold, keep hand-added marks, skip decided tracks on scheduled runs, and force-refresh from Advanced.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.1.0.0/explicitfin_2.1.0.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.1.0.0/explicitfin_2.1.0.0.zip",
         "checksum": "e60d901989abbd7a3890dd7e79050a1f",
         "timestamp": "2026-09-03T00:59:01Z"
       },
@@ -132,7 +140,7 @@
         "version": "2.0.10.0",
         "changelog": "Normalize arrow punctuation in UI copy and logs.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.10.0/explicitfin_2.0.10.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.0.10.0/explicitfin_2.0.10.0.zip",
         "checksum": "acca03456027d9e9dab95cff3ed64762",
         "timestamp": "2026-08-29T16:26:28Z"
       },
@@ -140,7 +148,7 @@
         "version": "2.0.9.0",
         "changelog": "Shorten catalog description.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.9.0/explicitfin_2.0.9.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.0.9.0/explicitfin_2.0.9.0.zip",
         "checksum": "24d4081a66f0df4a92000a9f92135db7",
         "timestamp": "2026-08-29T02:09:11Z"
       },
@@ -148,7 +156,7 @@
         "version": "2.0.8.0",
         "changelog": "Use 1920x1080 backdrop SVG as the Jellyfin plugin catalog icon.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.8.0/explicitfin_2.0.8.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.0.8.0/explicitfin_2.0.8.0.zip",
         "checksum": "9fc1ad7abf929955a5d536db9b578da4",
         "timestamp": "2026-08-29T01:54:09Z"
       },
@@ -156,7 +164,7 @@
         "version": "2.0.7.0",
         "changelog": "Refresh branding: flatter logo + 1920x1080 backdrop assets.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.7.0/explicitfin_2.0.7.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.0.7.0/explicitfin_2.0.7.0.zip",
         "checksum": "3c2b3e4485ca363596d33a502fe6aed6",
         "timestamp": "2026-08-29T01:47:00Z"
       },
@@ -164,7 +172,7 @@
         "version": "2.0.6.0",
         "changelog": "Add plugin catalog icon.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.6.0/explicitfin_2.0.6.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.0.6.0/explicitfin_2.0.6.0.zip",
         "checksum": "420c76d0f177c1505e234b8057b33bc9",
         "timestamp": "2026-08-29T01:39:23Z"
       },
@@ -172,15 +180,15 @@
         "version": "2.0.5.0",
         "changelog": "Faster album-scoped Deezer matching with HTTP cache; keep local titles; config cleanup and Remove symbol tool.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.5.0/explicitfin_2.0.5.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.0.5.0/explicitfin_2.0.5.0.zip",
         "checksum": "1321f2fc318bab8bbc0600048c7d13d4",
         "timestamp": "2026-08-29T00:42:53Z"
       },
       {
         "version": "2.0.4.0",
-        "changelog": "Shorten display title to ExplicitFin: Mark Your Songs.",
+        "changelog": "Shorten display title to ExplicitTagShelf: Mark Your Songs.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.4.0/explicitfin_2.0.4.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.0.4.0/explicitfin_2.0.4.0.zip",
         "checksum": "ab167898baf14f7a7dfe22c7e5e050f1",
         "timestamp": "2026-08-28T21:02:59Z"
       },
@@ -188,23 +196,23 @@
         "version": "2.0.3.0",
         "changelog": "Add optional Jellyfin tags on explicit tracks (default Explicit) for library filtering.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.3.0/explicitfin_2.0.3.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.0.3.0/explicitfin_2.0.3.0.zip",
         "checksum": "4ff150451dbbf216fdfb4e92ee9a0f4e",
         "timestamp": "2026-08-28T20:56:11Z"
       },
       {
         "version": "2.0.2.0",
-        "changelog": "Rename display title to ExplicitFin: Visually Mark Your Songs.",
+        "changelog": "Rename display title to ExplicitTagShelf: Visually Mark Your Songs.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.2.0/explicitfin_2.0.2.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.0.2.0/explicitfin_2.0.2.0.zip",
         "checksum": "43b4549846bb60a59e6f8e8f475be658",
         "timestamp": "2026-08-28T20:52:38Z"
       },
       {
         "version": "2.0.1.0",
-        "changelog": "MusicFin-style settings: sortable providers, MusicBrainz contact, and configurable min similarity.",
+        "changelog": "MusicTagShelf-style settings: sortable providers, MusicBrainz contact, and configurable min similarity.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.1.0/explicitfin_2.0.1.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.0.1.0/explicitfin_2.0.1.0.zip",
         "checksum": "a2ba5f12e4fc7546e89f66e4eb9fcbab",
         "timestamp": "2026-08-28T20:48:58Z"
       },
@@ -212,15 +220,15 @@
         "version": "2.0.0.0",
         "changelog": "Simplify to title marking: Deezer\u2192MusicBrainz search, dual-version preference, change log. Drop tags, album marks, Apple Music, playlist repair, disk cache.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v2.0.0.0/explicitfin_2.0.0.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v2.0.0.0/explicitfin_2.0.0.0.zip",
         "checksum": "bb40b93f34b695d7eee46685f68ec609",
         "timestamp": "2026-08-28T20:45:05Z"
       },
       {
         "version": "1.2.0.0",
-        "changelog": "Repository renamed to ExplicitFin on GitHub.",
+        "changelog": "Repository renamed to ExplicitTagShelf on GitHub.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/TidBits16/ExplicitFin/releases/download/v1.2.0.0/explicitfin_1.2.0.0.zip",
+        "sourceUrl": "https://github.com/TidBits16/ExplicitTagShelf/releases/download/v1.2.0.0/explicitfin_1.2.0.0.zip",
         "checksum": "b1aebb671d4a74e5862a0c564e28f082",
         "timestamp": "2026-08-24T17:35:00Z"
       }

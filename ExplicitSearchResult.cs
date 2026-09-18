@@ -1,4 +1,4 @@
-namespace Jellyfin.Plugin.ExplicitTagger;
+namespace Jellyfin.Plugin.ExplicitTagShelf;
 
 /// <summary>Outcome of a title/artist/album search against one provider.</summary>
 public sealed class ExplicitSearchResult

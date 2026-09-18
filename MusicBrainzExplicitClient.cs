@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Jellyfin.Plugin.ExplicitTagger;
+namespace Jellyfin.Plugin.ExplicitTagShelf;
 
 public sealed class MusicBrainzExplicitClient
 {
@@ -244,5 +244,5 @@ public sealed class MusicBrainzExplicitClient
     }
 
     private static string BuildUserAgent()
-        => "ExplicitFin/2.0 ( https://github.com/TidBits16/ExplicitFin )";
+        => "ExplicitTagShelf/2.0 ( https://github.com/TidBits16/ExplicitTagShelf )";
 }

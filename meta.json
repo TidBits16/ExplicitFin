@@ -1,13 +1,13 @@
 {
   "guid": "f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f",
-  "name": "ExplicitFin: Mark Your Songs",
-  "description": "Adds explicit symbols to track and album titles.",
+  "name": "ExplicitTagShelf: Mark Your Songs",
+  "description": "Adds explicit symbols to track titles.",
   "overview": "Adds explicit symbols to track titles.",
   "owner": "TidBits16",
   "category": "Metadata",
-  "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitFin/main/backdrop.svg",
-  "version": "2.1.14.0",
+  "imageUrl": "https://raw.githubusercontent.com/TidBits16/ExplicitTagShelf/main/backdrop.svg",
+  "version": "2.2.0.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Simultaneous-run safety: preserve explicit marks on album renames, album re-mark when tracks seen, shared Deezer/MusicBrainz pace, staggered Sunday defaults.",
+  "changelog": "Rebrand from ExplicitFin to ExplicitTagShelf; new TagShelf logo; migrate HTTP cache folder.",
   "imagePath": "backdrop.svg"
 }

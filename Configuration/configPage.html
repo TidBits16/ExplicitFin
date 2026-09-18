@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>ExplicitFin: Mark Your Songs</title>
+    <title>ExplicitTagShelf: Mark Your Songs</title>
     <style>
         .finConfig .finIntro { margin: 0.25em 0 1.5em; opacity: 0.75; }
         .finConfig .verticalSection { margin-top: 1.75em; }
@@ -51,9 +51,9 @@
             <div class="content-primary">
                 <form id="EfConfigForm">
                     <div class="sectionTitleContainer flex align-items-center">
-                        <h2 class="sectionTitle">ExplicitFin: Mark Your Songs</h2>
+                        <h2 class="sectionTitle">ExplicitTagShelf: Mark Your Songs</h2>
                     </div>
-                    <p class="fieldDescription finIntro">Adds explicit symbols to track titles, and optionally albums. Safe alongside other Fin plugins — when force-running manually, run MusicFin first. Scheduled scans only touch tracks they have not decided yet.</p>
+                    <p class="fieldDescription finIntro">Adds explicit symbols to track titles, and optionally albums. Safe alongside other TagShelf plugins — when force-running manually, run MusicTagShelf first. Scheduled scans only touch tracks they have not decided yet.</p>
 
                     <div class="verticalSection">
                         <h3 class="checkboxListLabel finSectionLabel">Metadata providers</h3>
@@ -360,7 +360,7 @@
                 Dashboard.showLoadingMsg();
                 return ApiClient.ajax({
                     type: 'POST',
-                    url: ApiClient.getUrl('ExplicitFin/RemoveSymbol'),
+                    url: ApiClient.getUrl('ExplicitTagShelf/RemoveSymbol'),
                     data: JSON.stringify({ Symbol: symbol }),
                     contentType: 'application/json',
                     dataType: 'json'
@@ -386,7 +386,7 @@
                 Dashboard.showLoadingMsg();
                 return ApiClient.ajax({
                     type: 'POST',
-                    url: ApiClient.getUrl('ExplicitFin/ScanAll'),
+                    url: ApiClient.getUrl('ExplicitTagShelf/ScanAll'),
                     contentType: 'application/json',
                     dataType: 'json'
                 }).then(function () {

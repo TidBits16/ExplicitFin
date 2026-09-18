@@ -1,4 +1,4 @@
-name: "ExplicitFin: Mark Your Songs"
+name: "ExplicitTagShelf: Mark Your Songs"
 guid: "f41c8e2d-6b3a-4d9e-8f1c-0a2b3c4d5e6f"
 version: "2.1.14.0"
 targetAbi: "10.11.0.0"
@@ -8,7 +8,7 @@ description: "Adds explicit symbols to track and album titles."
 category: "Metadata"
 owner: "TidBits16"
 artifacts:
-  - "Jellyfin.Plugin.ExplicitTagger.dll"
+  - "Jellyfin.Plugin.ExplicitTagShelf.dll"
   - "backdrop.svg"
 changelog: >
   Simultaneous-run safety: preserve explicit marks on album renames, album re-mark when tracks seen, shared Deezer/MusicBrainz pace, staggered Sunday defaults.

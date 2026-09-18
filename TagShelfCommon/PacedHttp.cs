@@ -2,9 +2,9 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 
-namespace Jellyfin.Plugin.FinCommon;
+namespace Jellyfin.Plugin.TagShelfCommon;
 
-/// <summary>Paced HTTP GET with disk cache. Options cover MusicFin/ExplicitFin and LyricFin/ArtistFin.</summary>
+/// <summary>Paced HTTP GET with disk cache. Options cover MusicTagShelf / ExplicitTagShelf / LyricTagShelf / ArtistTagShelf.</summary>
 public sealed class PacedHttp
 {
     private readonly HttpClient _http;

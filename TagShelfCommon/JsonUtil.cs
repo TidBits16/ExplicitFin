@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 
-namespace Jellyfin.Plugin.FinCommon;
+namespace Jellyfin.Plugin.TagShelfCommon;
 
 public static class JsonUtil
 {

@@ -1,14 +1,14 @@
 using System.Collections.Concurrent;
 using System.Text;
 using Jellyfin.Data.Enums;
-using Jellyfin.Plugin.ExplicitTagger.Configuration;
+using Jellyfin.Plugin.ExplicitTagShelf.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.ExplicitTagger;
+namespace Jellyfin.Plugin.ExplicitTagShelf;
 
 public class ExplicitEngine
 {
@@ -50,14 +50,14 @@ public class ExplicitEngine
         if (force)
         {
             _cache.Clear();
-            _logger.LogInformation("ExplicitFin: force scan requested (HTTP cache cleared)");
+            _logger.LogInformation("ExplicitTagShelf: force scan requested (HTTP cache cleared)");
         }
 
         var cfg = Plugin.Instance?.Configuration ?? new PluginConfiguration();
         var workers = cfg.Workers <= 0 ? Environment.ProcessorCount : cfg.Workers;
         workers = Math.Clamp(workers, 1, Math.Max(1, Environment.ProcessorCount));
         Titles.UseStyle(cfg.ExplicitMark, cfg.PrependExplicitMark);
-        var seen = new SeenStore(Path.Combine(_paths.PluginConfigurationsPath, "ExplicitFin-seen.txt"));
+        var seen = new SeenStore(Path.Combine(_paths.PluginConfigurationsPath, "ExplicitTagShelf-seen.txt"));
         try
         {
             var tracks = _library.GetItemList(new InternalItemsQuery
@@ -68,13 +68,13 @@ public class ExplicitEngine
 
             var albums = GroupByAlbum(tracks);
             _logger.LogInformation(
-                "ExplicitFin: {Tracks} tracks across {Albums} albums, {Workers} workers ({Mode})",
+                "ExplicitTagShelf: {Tracks} tracks across {Albums} albums, {Workers} workers ({Mode})",
                 tracks.Count,
                 albums.Count,
                 workers,
                 force ? "force all" : "new only");
 
-            var changeLogPath = Path.Combine(_paths.PluginConfigurationsPath, "ExplicitFin-changes.log");
+            var changeLogPath = Path.Combine(_paths.PluginConfigurationsPath, "ExplicitTagShelf-changes.log");
             var searchMemo = new ConcurrentDictionary<string, (ExplicitSearchResult Result, string Source)>(
                 StringComparer.Ordinal);
             var totalWrites = 0;
@@ -111,7 +111,7 @@ public class ExplicitEngine
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "ExplicitFin failed on album {Album}", albumGroup.AlbumName);
+                    _logger.LogWarning(ex, "ExplicitTagShelf failed on album {Album}", albumGroup.AlbumName);
                     foreach (var _ in albumGroup.Tracks)
                     {
                         var n = Interlocked.Increment(ref completed);
@@ -126,7 +126,7 @@ public class ExplicitEngine
 
             progress.Report(100);
             _logger.LogInformation(
-                "ExplicitFin finished: {Writes} title updates, Deezer http {Dz}/{DzCache} cache, MusicBrainz http {Mb}/{MbCache} cache",
+                "ExplicitTagShelf finished: {Writes} title updates, Deezer http {Dz}/{DzCache} cache, MusicBrainz http {Mb}/{MbCache} cache",
                 totalWrites,
                 _deezer.HttpCount,
                 _deezer.CacheHits,
@@ -157,7 +157,7 @@ public class ExplicitEngine
                 .Where(t => !seen.Contains(t.Id) && !LookupMiss.IsRemembered(_cache, TrackMissKey(t)))
                 .ToList();
 
-        // Tracks already decided — still allow album mark pass so MusicFin renames get marks restored.
+        // Tracks already decided — still allow album mark pass so MusicTagShelf renames get marks restored.
         if (pending.Count == 0)
         {
             foreach (var _ in albumGroup.Tracks)
@@ -189,7 +189,7 @@ public class ExplicitEngine
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "ExplicitFin failed marking album {Album}", albumGroup.AlbumName);
+                _logger.LogWarning(ex, "ExplicitTagShelf failed marking album {Album}", albumGroup.AlbumName);
             }
 
             return writes;
@@ -257,7 +257,7 @@ public class ExplicitEngine
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "ExplicitFin failed on track {Id} ({Name})", track.Id, track.Name);
+                _logger.LogWarning(ex, "ExplicitTagShelf failed on track {Id} ({Name})", track.Id, track.Name);
             }
             finally
             {
@@ -284,7 +284,7 @@ public class ExplicitEngine
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "ExplicitFin failed marking album {Album}", albumGroup.AlbumName);
+            _logger.LogWarning(ex, "ExplicitTagShelf failed marking album {Album}", albumGroup.AlbumName);
         }
 
         return writes;
@@ -370,7 +370,7 @@ public class ExplicitEngine
         if (nameChanged)
         {
             _logger.LogInformation(
-                "ExplicitFin renamed {Id}: {Old} --> {New} ({Source}, {Decision})",
+                "ExplicitTagShelf renamed {Id}: {Old} --> {New} ({Source}, {Decision})",
                 track.Id,
                 oldName,
                 desired,
@@ -382,7 +382,7 @@ public class ExplicitEngine
         else
         {
             _logger.LogInformation(
-                "ExplicitFin updated tags on {Id} ({Name}) ({Source}, {Decision})",
+                "ExplicitTagShelf updated tags on {Id} ({Name}) ({Source}, {Decision})",
                 track.Id,
                 track.Name,
                 source,
@@ -458,7 +458,7 @@ public class ExplicitEngine
                 if (nameChanged)
                 {
                     _logger.LogInformation(
-                        "ExplicitFin renamed album {Id}: {Old} --> {New} (deezer-album={Deezer}, tracks={Tracks}, {Decision})",
+                        "ExplicitTagShelf renamed album {Id}: {Old} --> {New} (deezer-album={Deezer}, tracks={Tracks}, {Decision})",
                         album.Id,
                         oldName,
                         desired,
@@ -470,7 +470,7 @@ public class ExplicitEngine
                 else
                 {
                     _logger.LogInformation(
-                        "ExplicitFin updated tags on album {Id} ({Name}) (deezer-album={Deezer}, tracks={Tracks}, {Decision})",
+                        "ExplicitTagShelf updated tags on album {Id} ({Name}) (deezer-album={Deezer}, tracks={Tracks}, {Decision})",
                         album.Id,
                         album.Name,
                         deezerAlbumExplicit,
@@ -498,7 +498,7 @@ public class ExplicitEngine
                 cancellationToken).ConfigureAwait(false);
             retargeted++;
             _logger.LogInformation(
-                "ExplicitFin retargeted track {Id} ({Name}) album {Old} --> {New}",
+                "ExplicitTagShelf retargeted track {Id} ({Name}) album {Old} --> {New}",
                 track.Id,
                 track.Name,
                 oldAlbum,
@@ -585,7 +585,7 @@ public class ExplicitEngine
                 if (nameChanged)
                 {
                     _logger.LogInformation(
-                        "ExplicitFin removed symbol from {Id}: {Old} --> {New}",
+                        "ExplicitTagShelf removed symbol from {Id}: {Old} --> {New}",
                         track.Id,
                         currentName,
                         cleanedName);
@@ -594,7 +594,7 @@ public class ExplicitEngine
                 if (albumChanged)
                 {
                     _logger.LogInformation(
-                        "ExplicitFin removed symbol from {Id} album: {Old} --> {New}",
+                        "ExplicitTagShelf removed symbol from {Id} album: {Old} --> {New}",
                         track.Id,
                         currentAlbum,
                         cleanedAlbum);
@@ -625,13 +625,13 @@ public class ExplicitEngine
                     cancellationToken).ConfigureAwait(false);
                 updated++;
                 _logger.LogInformation(
-                    "ExplicitFin removed symbol from album {Id}: {Old} --> {New}",
+                    "ExplicitTagShelf removed symbol from album {Id}: {Old} --> {New}",
                     album.Id,
                     current,
                     cleaned);
             }
 
-            _logger.LogInformation("ExplicitFin RemoveSymbol finished: {Count} titles updated", updated);
+            _logger.LogInformation("ExplicitTagShelf RemoveSymbol finished: {Count} titles updated", updated);
             return updated;
         }
         finally
@@ -886,7 +886,7 @@ public class ExplicitEngine
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "ExplicitFin could not write change log");
+            _logger.LogWarning(ex, "ExplicitTagShelf could not write change log");
         }
     }
 

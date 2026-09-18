@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 
-namespace Jellyfin.Plugin.FinCommon;
+namespace Jellyfin.Plugin.TagShelfCommon;
 
 /// <summary>
-/// Cross-plugin pace for hosts multiple Fin plugins share (Deezer, MusicBrainz).
-/// Uses a temp-dir file lock so vendored FinCommon copies in separate assemblies still serialize.
+/// Cross-plugin pace for hosts multiple TagShelf plugins share (Deezer, MusicBrainz).
+/// Uses a temp-dir file lock so vendored TagShelfCommon copies in separate assemblies still serialize.
 /// </summary>
 public static class SharedHostGate
 {
@@ -21,7 +21,7 @@ public static class SharedHostGate
             return;
         }
 
-        var dir = Path.Combine(Path.GetTempPath(), "jellyfin-finfamily-pace");
+        var dir = Path.Combine(Path.GetTempPath(), "jellyfin-tagshelf-pace");
         Directory.CreateDirectory(dir);
         var lockPath = Path.Combine(dir, key + ".lock");
         var nextPath = Path.Combine(dir, key + ".next");
